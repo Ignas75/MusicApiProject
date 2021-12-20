@@ -38,7 +38,7 @@ public class AuthorizationController {
         for (int i = 0 ; i < 20 ; i++){
             sb.append(validCharset.charAt(rng.nextInt(0, validCharset.length())));
         }
-        Role role = null;
+        Role role;
         if (employeeRepository.existsByEmail(emailAddress)){
             Employee employee = employeeRepository.findByEmail(emailAddress);
             if (employee.getTitle().contains("General Manager") || employee.getTitle().contains("IT")){
@@ -55,8 +55,13 @@ public class AuthorizationController {
                 role,
                 LocalDate.now()
         );
-        tokenRepository.save(newToken);
-
+        if (tokenRepository.existsByEmail(emailAddress)){
+            Token token = tokenRepository.getByEmail(emailAddress);
+            token.setAuthToken(sb.toString());
+            tokenRepository.save(token);
+        }else {
+            tokenRepository.save(newToken);
+        }
         return new ResponseEntity<>("{\n\"email\": " + "\"" + emailAddress + "\",\n" + "\"token\": " + "\"" + sb + "\"\n}", headers, HttpStatus.OK);
     }
 
