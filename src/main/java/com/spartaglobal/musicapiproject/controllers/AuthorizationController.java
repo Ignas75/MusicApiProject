@@ -1,12 +1,12 @@
 package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.Employee;
-import com.spartaglobal.musicapiproject.entities.Endpointpermission;
+import com.spartaglobal.musicapiproject.entities.EndpointPermission;
 import com.spartaglobal.musicapiproject.entities.Role;
 import com.spartaglobal.musicapiproject.entities.Token;
 import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.EmployeeRepository;
-import com.spartaglobal.musicapiproject.repositories.EndpointpermissionRepository;
+import com.spartaglobal.musicapiproject.repositories.EndpointPermissionRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +34,7 @@ public class AuthorizationController {
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
-    private EndpointpermissionRepository endpointpermissionRepository;
+    private EndpointPermissionRepository endpointpermissionRepository;
 
     @GetMapping("/chinook/create-token")
     public ResponseEntity<String> generateNewAuthToken(@RequestParam String emailAddress){
@@ -121,7 +121,7 @@ public class AuthorizationController {
     public boolean isAuthorizedForAction(String authToken, String endpoint){
         if(tokenRepository.existsByAuthToken(authToken)){
             Token token = tokenRepository.getByAuthToken(authToken);
-            Endpointpermission permissions = endpointpermissionRepository.getByUrl(endpoint);
+            EndpointPermission permissions = endpointpermissionRepository.getByUrl(endpoint);
             switch (token.getRoleID().getId()){
                 case 1 -> {
                     if (permissions.getIsForAdmins()) return true;
