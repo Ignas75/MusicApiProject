@@ -43,7 +43,7 @@ public class UserContentSearch {
     @GetMapping (value = "/chinook/search")
     public List<? extends UserSearchable> getQuery()
     {
-        trackRepository.findOne()
+
         return null;
     }
 
