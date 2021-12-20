@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "album")
-public class Album {
+public class Album implements UserSearchable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "AlbumId", nullable = false)
@@ -39,5 +39,10 @@ public class Album {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String userSearch() {
+        return title;
     }
 }

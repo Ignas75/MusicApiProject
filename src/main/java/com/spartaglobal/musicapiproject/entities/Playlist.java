@@ -3,11 +3,11 @@ package com.spartaglobal.musicapiproject.entities;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "artist")
-public class Artist implements UserSearchable {
+@Table(name = "playlist")
+public class Playlist implements UserSearchable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ArtistId", nullable = false)
+    @Column(name = "PlaylistId", nullable = false)
     private Integer id;
 
     @Column(name = "Name", length = 120)
