@@ -1,0 +1,23 @@
+{
+  "name": "For Those About To Rock (We Salute You)",
+  "albumId": {
+    "id": 1,
+    "title": "For Those About To Rock We Salute You",
+    "artistId": {
+      "id": 1,
+      "name": "AC/DC"
+    }
+  },
+  "mediaTypeId": {
+    "id": 1,
+    "name": "MPEG audio file"
+  },
+  "genreId": {
+    "id": 1,
+    "name": "Rock"
+  },
+  "composer": "Angus Young, Malcolm Young, Brian Johnson",
+  "milliseconds": 343719,
+  "bytes": 11170334,
+  "unitPrice": 0.99
+}
