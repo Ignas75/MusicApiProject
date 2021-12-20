@@ -58,7 +58,7 @@ public class AuthorizationController {
         if (tokenRepository.existsByEmail(emailAddress)){
             Token token = tokenRepository.getByEmail(emailAddress);
             token.setAuthToken(sb.toString());
-            tokenRepository.save(newToken);
+            tokenRepository.save(token);
         }else {
             tokenRepository.save(newToken);
         }
