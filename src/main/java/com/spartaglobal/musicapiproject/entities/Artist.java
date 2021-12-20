@@ -10,6 +10,17 @@ public class Artist {
     @Column(name = "ArtistId", nullable = false)
     private Integer id;
 
+    @Column(name = "Name", length = 120)
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Integer getId() {
         return id;
     }
