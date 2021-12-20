@@ -10,12 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 public class AuthorizationController {
@@ -35,8 +39,19 @@ public class AuthorizationController {
         Random rng = new Random();
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-        for (int i = 0 ; i < 20 ; i++){
-            sb.append(validCharset.charAt(rng.nextInt(0, validCharset.length())));
+        Set<String> allExistingTokenStrings = tokenRepository
+                .findAll()
+                .stream()
+                .map(Token::getAuthToken)
+                .collect(Collectors.toSet());
+        boolean generatedUniqueToken = false;
+        while (!generatedUniqueToken){
+            for (int i = 0 ; i < 20 ; i++){
+                sb.append(validCharset.charAt(rng.nextInt(0, validCharset.length())));
+            }
+            if (!allExistingTokenStrings.contains(sb.toString())){
+                generatedUniqueToken = true;
+            }
         }
         Role role;
         if (employeeRepository.existsByEmail(emailAddress)){
@@ -63,6 +78,18 @@ public class AuthorizationController {
             tokenRepository.save(newToken);
         }
         return new ResponseEntity<>("{\n\"email\": " + "\"" + emailAddress + "\",\n" + "\"token\": " + "\"" + sb + "\"\n}", headers, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/chinook/clear-token")
+    public ResponseEntity<String> clearExistingAuthToken(@RequestParam String emailAddress){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+        if(tokenRepository.existsByEmail(emailAddress)){
+            tokenRepository.delete(tokenRepository.getByEmail(emailAddress));
+            return new ResponseEntity<>("{\"message\": \"Token cleared. You will need a new token to use the services again.\"}", headers, HttpStatus.PRECONDITION_FAILED);
+        } else {
+            return new ResponseEntity<>("{\"message\": \"email address not registered\"}", headers, HttpStatus.NOT_FOUND);
+        }
     }
 
 }
