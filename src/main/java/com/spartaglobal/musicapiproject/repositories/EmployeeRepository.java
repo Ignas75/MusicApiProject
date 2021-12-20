@@ -4,5 +4,6 @@ import com.spartaglobal.musicapiproject.entities.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
-    boolean existsByEmailAddress(String emailAddress);
+    boolean existsByEmail(String emailAddress);
+    Employee findByEmail(String emailAddress);
 }
