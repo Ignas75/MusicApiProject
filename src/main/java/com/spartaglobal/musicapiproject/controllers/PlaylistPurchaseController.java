@@ -18,7 +18,6 @@ import java.util.Optional;
 @RestController
 public class PlaylistPurchaseController {
 
-
     @Autowired
     private PlaylisttrackRepository playlisttrackRepository;
 
@@ -47,8 +46,6 @@ public class PlaylistPurchaseController {
 
         /** Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll().stream().filter(s -> s.getId().getPlaylistId() == playListId).toList();
-        int numTrack = allPlaylistTracks.size();
-
 
         /**Storing the total price of the playlist 2240*/
         totalPrice = BigDecimal.valueOf(0);
@@ -70,11 +67,6 @@ public class PlaylistPurchaseController {
         invoice.setTotal(totalPrice);
         invoiceRepository.save(invoice);
 
-
-
-
-
-
        List<Invoiceline> batch = new ArrayList<>();
 
        for (Playlisttrack p : allPlaylistTracks){
@@ -89,11 +81,9 @@ public class PlaylistPurchaseController {
                batch.add(temp);
        }
 
+
        invoicelineRepository.saveAllAndFlush(batch);
-
-
         /**Update the total in the invoice*/
-
         Optional<Invoice> inv = invoiceRepository.findById(invoice.getId());
         inv.get().setTotal(totalPrice);
         invoiceRepository.save(invoice);
