@@ -60,7 +60,7 @@ public class UserContentSearch {
     }
 
     private void wordChecker(UserSearchable list, String name) {
-        List<String> splitElement = Arrays.asList(list.userSearch().split(" "));
+        String[] splitElement = list.userSearch().split(" ");
         for (String split : splitElement) {
             if (split.equalsIgnoreCase(name)) searchSet.add(list);
         }
