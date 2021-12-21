@@ -5,11 +5,8 @@ import com.spartaglobal.musicapiproject.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,10 +98,18 @@ public class PurchaseController {
     // purchase an album
     // need already purchased tracks from the user that belong to the current album
     // what if the same song is on another album?
+    // TODO: add discounts
     @PostMapping(value = "album/purchase")
     public ResponseEntity<String> purchaseAlbum(@RequestParam Integer albumId, @RequestParam Integer customerId,
                                                 @RequestParam String billingAddress, @RequestParam String billingCity,
-                                                @RequestParam String billingCountry, @RequestParam String postalCode){
+                                                @RequestParam String billingCountry, @RequestParam String postalCode,
+                                                @RequestHeader("Authorization") String authToken){
+        AuthorizationController authorizationController = new AuthorizationController();
+        if(!authorizationController.isAuthorizedForAction(authToken.split(" ")[3], "album/purchase")) {
+            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
+
+
         Optional<Customer> findCustomer = customerRepository.findById(customerId);
         // checking if the Ids are valid
         if(findCustomer.isEmpty()){
