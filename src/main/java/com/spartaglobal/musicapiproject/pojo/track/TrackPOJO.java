@@ -1,4 +1,4 @@
-package com.spartaglobal.musicapiproject.pojo;
+package com.spartaglobal.musicapiproject.pojo.track;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

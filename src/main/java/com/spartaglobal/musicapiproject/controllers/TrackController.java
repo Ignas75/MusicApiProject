@@ -25,6 +25,16 @@ public class TrackController {
     @Autowired
     private PlaylisttrackRepository playlisttrackRepo;
 
+    @GetMapping(value = "/chinook/track")
+    public Track getTrack(@RequestParam Integer id) {
+        Optional<Track> result = trackRepo.findById(id);
+        if(result.isPresent()){
+            return result.get();
+        } else {
+            return null;
+        }
+    }
+
     @Transactional
     @DeleteMapping(value = "/chinook/delete/track")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
@@ -33,7 +43,6 @@ public class TrackController {
         playlisttrackRepo.deleteByIdTrackId(id);
         trackRepo.deleteById(id);
     }
-
 
     @PostMapping(value="/Chinook/new-track")
     public Track createTrack(@Valid @RequestBody Track track1){

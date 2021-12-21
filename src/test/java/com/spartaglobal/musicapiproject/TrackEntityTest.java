@@ -1,7 +1,7 @@
 package com.spartaglobal.musicapiproject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spartaglobal.musicapiproject.pojo.TrackPOJO;
+import com.spartaglobal.musicapiproject.pojo.track.TrackPOJO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,10 +33,11 @@ public class TrackEntityTest {
     }
 
     @Test
-    public void addNewFilmHttpClientVersion() throws IOException, InterruptedException, URISyntaxException {
+    @DisplayName("POST creating a new track")
+    public void addNewTrackHttpClientVersion() throws IOException, InterruptedException, URISyntaxException {
         HttpRequest req = HttpRequest
                 .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/track/add"))
+                .uri(new URI("http://localhost:8080/Chinook/new-track"))
                 .POST(HttpRequest.BodyPublishers.ofFile(Path.of("src/test/java/com/spartaglobal/musicapiproject/json/track.json")))
                 .header("content-type", "application/json")
                 .build();
@@ -49,7 +50,9 @@ public class TrackEntityTest {
         TrackPOJO track = mapper.readValue(json, TrackPOJO.class);
         System.out.println("Inserted New track with id = " + track.getId());
         Assertions.assertEquals("Test tracks", track.getName());
-        Assertions.assertEquals("AC/DC", track.getAlbumId().getTitle());
+        Assertions.assertEquals("testing tracks", track.getAlbumId().getTitle());
         Assertions.assertEquals("Angus Young", track.getComposer());
     }
+
+
 }
