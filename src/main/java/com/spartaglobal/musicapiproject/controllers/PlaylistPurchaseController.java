@@ -6,18 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @RestController
 public class PlaylistPurchaseController {
@@ -37,26 +38,23 @@ public class PlaylistPurchaseController {
 
     @Autowired
     private InvoiceRepository invoiceRepository;
+    BigDecimal totalPrice;
 
 
+    //TODO Include the body to get the authentication token, to get the customer information//
+    @PostMapping(value = "/chinook/playlist")
+    public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestParam Integer customerID){
 
-    @GetMapping(value = "/chinook/playlist")
-    public List<Playlisttrack> getPlaylist(@RequestParam Integer playListId, @RequestParam Integer customerID){
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-
 
         /** Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll().stream().filter(s -> s.getId().getPlaylistId() == playListId).toList();
         int numTrack = allPlaylistTracks.size();
 
-        /**Used to get the last invoice number in the InvoiceLine Table*/
-       // int num = (int) invoicelineRepository.count();
-
-
 
         /**Storing the total price of the playlist 2240*/
-        BigDecimal totalPrice = BigDecimal.valueOf(0);
+        totalPrice = BigDecimal.valueOf(0);
 
 
         /** Predefine the Invoice tables invoice ID*/
@@ -77,33 +75,34 @@ public class PlaylistPurchaseController {
 
 
 
-        /**Seting the object for Invoice line, each invoiceLine row in this playlist will belong to only one invoice*/
 
 
-        //Change this to multi thread
-        //from number of tracks
-        for (int i =0; i < numTrack; i++){
-            Invoiceline temp = new Invoiceline();
-            temp.setInvoiceId(invoice); //InvoiceID
-            Track track = trackRepository.getById(allPlaylistTracks.get(i).getId().getTrackId());
-            BigDecimal unitPrice = track.getUnitPrice();
-            totalPrice = unitPrice.add(totalPrice);
-            temp.setTrackId(track);
-            temp.setUnitPrice(track.getUnitPrice());
-            temp.setQuantity(1);
-            invoicelineRepository.save(temp);
-        }
 
-        /**Save the invoice at the end*/
-        //save in the invoice
+       List<Invoiceline> batch = new ArrayList<>();
+
+       for (Playlisttrack p : allPlaylistTracks){
+               Invoiceline temp = new Invoiceline();
+               temp.setInvoiceId(invoice);
+               Track track = trackRepository.getById(p.getId().getTrackId());
+                BigDecimal unitPrice = track.getUnitPrice();
+                totalPrice = unitPrice.add(totalPrice);
+               temp.setTrackId(track);
+               temp.setUnitPrice(track.getUnitPrice());
+               temp.setQuantity(1);
+               batch.add(temp);
+       }
+
+       invoicelineRepository.saveAllAndFlush(batch);
 
 
-        /**Also need to be saved with dummy values*/
+        /**Update the total in the invoice*/
+
         Optional<Invoice> inv = invoiceRepository.findById(invoice.getId());
         inv.get().setTotal(totalPrice);
         invoiceRepository.save(invoice);
-        return null;
+        return new ResponseEntity<String>("{\"message\":\"Playlist Purchase Complete\",\"Total Price\":\""+totalPrice+"\"}", headers, HttpStatus.OK);
     }
+
 
 
 
