@@ -37,7 +37,7 @@ public class TrackEntityTest {
         HttpRequest req = HttpRequest
                 .newBuilder()
                 .uri(new URI("http://localhost:8080/chinook/track/add"))
-                .POST(HttpRequest.BodyPublishers.ofFile(Path.of("track.json")))
+                .POST(HttpRequest.BodyPublishers.ofFile(Path.of("src/test/java/com/spartaglobal/musicapiproject/json/track.json")))
                 .header("content-type", "application/json")
                 .build();
         HttpClient client = HttpClient.newHttpClient();
@@ -47,10 +47,9 @@ public class TrackEntityTest {
         System.out.println(resp);
         ObjectMapper mapper = new ObjectMapper();
         TrackPOJO track = mapper.readValue(json, TrackPOJO.class);
-        System.out.println("Inserted New Film with id = " + track.getId());
-        Assertions.assertEquals("TEAM ONE", track.getTitle());
-        Assertions.assertEquals("An Epic Development Team - " +
-                "Yefri, Kamil, George, Jakub, Ishmael", track.getDescription());
-        Assertions.assertEquals("2021-12-15T05:03:42Z", track.getLastUpdate());
+        System.out.println("Inserted New track with id = " + track.getId());
+        Assertions.assertEquals("Test tracks", track.getName());
+        Assertions.assertEquals("AC/DC", track.getAlbumId().getTitle());
+        Assertions.assertEquals("Angus Young", track.getComposer());
     }
 }

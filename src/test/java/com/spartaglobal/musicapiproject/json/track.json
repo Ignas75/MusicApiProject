@@ -5,7 +5,7 @@
     "title": "testing tracks",
     "artistId": {
       "id": 1,
-      "name": "AC/DC/TEST"
+      "name": "AC/DC"
     }
   },
   "mediaTypeId": {
@@ -16,7 +16,7 @@
     "id": 1,
     "name": "Rock"
   },
-  "composer": "Angus Young, Malcolm Young, Brian Johnson",
+  "composer": "Angus Young",
   "milliseconds": 343719,
   "bytes": 11170334,
   "unitPrice": 0.99
