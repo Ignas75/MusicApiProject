@@ -1,5 +1,7 @@
 package com.spartaglobal.musicapiproject.controllers;
 
+import com.spartaglobal.musicapiproject.entities.Album;
+import com.spartaglobal.musicapiproject.entities.Playlist;
 import com.spartaglobal.musicapiproject.entities.Playlisttrack;
 import com.spartaglobal.musicapiproject.repositories.PlaylistRepository;
 import com.spartaglobal.musicapiproject.repositories.PlaylisttrackRepository;
@@ -12,6 +14,7 @@ import javax.validation.Valid;
 
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @RestController
 public class PlaylistController {
@@ -31,5 +34,16 @@ public class PlaylistController {
     @PostMapping(value="/Chinook/new-playlist-track")
     public Playlisttrack createPlaylist(@Valid @RequestBody Playlisttrack playlisttrack){
         return playlistTrackRepo.save(playlisttrack);
+    }
+
+    @PatchMapping(value="/Chinook/update-playlist")
+    public Playlist updateAlbum(@Valid @RequestBody Playlist playlist1){
+        Optional<Playlist> res = playlistRepo.findById(playlist1.getId());
+        if(res.isPresent()){
+            playlistRepo.save(playlist1);
+            return playlist1;
+        } else {
+            return null;
+        }
     }
 }

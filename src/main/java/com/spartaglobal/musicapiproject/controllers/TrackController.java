@@ -1,5 +1,6 @@
 package com.spartaglobal.musicapiproject.controllers;
 
+import com.spartaglobal.musicapiproject.entities.Playlist;
 import com.spartaglobal.musicapiproject.entities.Track;
 import com.spartaglobal.musicapiproject.repositories.InvoicelineRepository;
 import com.spartaglobal.musicapiproject.repositories.PlaylisttrackRepository;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.Optional;
 
 
 @RestController
@@ -36,5 +38,16 @@ public class TrackController {
     @PostMapping(value="/Chinook/new-track")
     public Track createTrack(@Valid @RequestBody Track track1){
         return trackRepo.save(track1);
+    }
+
+    @PatchMapping(value="/Chinook/update-playlist")
+    public Track updateAlbum(@Valid @RequestBody Track track1){
+        Optional<Track> res = trackRepo.findById(track1.getId());
+        if(res.isPresent()){
+            trackRepo.save(track1);
+            return track1;
+        } else {
+            return null;
+        }
     }
 }

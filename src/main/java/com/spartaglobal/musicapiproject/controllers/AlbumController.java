@@ -6,17 +6,14 @@ import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
 import com.spartaglobal.musicapiproject.repositories.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class AlbumController {
@@ -26,8 +23,7 @@ public class AlbumController {
     private TrackRepository trackRepo;
     @Autowired
     private TrackController trackController;
-    @Autowired
-    private AlbumRepository albumRepo;
+
 
     @Transactional
     @DeleteMapping(value = "/chinook/delete/album")
@@ -44,4 +40,19 @@ public class AlbumController {
     public Album createAlbum(@Valid @RequestBody Album album1){
         return albumRepo.save(album1);
     }
+
+    @PatchMapping(value="/Chinook/update-album/{id}")
+    public Album updateAlbum(@Valid @RequestBody Album id ){
+        Optional<Album> res = albumRepo.findById(id.getId());
+        if(res.isPresent()){
+            albumRepo.save(id);
+            return id;
+        } else {
+            return null;
+        }
+    }
+
+
 }
+
+
