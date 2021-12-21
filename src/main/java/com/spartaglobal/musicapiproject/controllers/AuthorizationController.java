@@ -8,6 +8,7 @@ import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.EmployeeRepository;
 import com.spartaglobal.musicapiproject.repositories.EndpointPermissionRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
+import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,13 +26,13 @@ public class AuthorizationController {
     private static final String validCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTYUVWXYZ0123456789";
 
     @Autowired
+    private AuthorizationService as = new AuthorizationService();
+    @Autowired
     private TokenRepository tokenRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
     @Autowired
     private CustomerRepository customerRepository;
-    @Autowired
-    private EndpointPermissionRepository endpointpermissionRepository;
 
     @GetMapping("/chinook/create-token")
     public ResponseEntity<String> generateNewAuthToken(@RequestParam String emailAddress){
@@ -95,56 +96,23 @@ public class AuthorizationController {
     // THESE ARE PROOF OF CONCEPT URLS FOR THE AUTH SYSTEM
     @GetMapping("chinook/customer-page")
     public ResponseEntity<String> testFunction(@RequestHeader("Authorization") String authToken){
-        if(isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer-page")) {
+        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer-page")) {
             return new ResponseEntity<>("Authorized", HttpStatus.OK);
         } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("chinook/employee-page")
     public ResponseEntity<String> testFunction2(@RequestHeader("Authorization") String authToken){
-        if(isAuthorizedForAction(authToken.split(" ")[1], "chinook/employee-page")) {
+        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/employee-page")) {
             return new ResponseEntity<>("Authorized", HttpStatus.OK);
         } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("chinook/admin-page")
     public ResponseEntity<String> testFunction3(@RequestHeader("Authorization") String authToken){
-        if(isAuthorizedForAction(authToken.split(" ")[1], "chinook/admin-page")) {
+        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/admin-page")) {
             return new ResponseEntity<>("Authorized", HttpStatus.OK);
         } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-    }
-
-    // Auth function, called with the token in a request and the endpoint hardcoded from inside the function tied to that endpoint
-    /*
-       This function should be called as the first part of your endpoint function if it requires authentication.
-       The token should be supplied to your endpoint as part of the RequestHeader "Authorization" which should have value "Basic <token> (see above for examples)
-       The endpoint URL should be hardcoded to match whichever mapping you are making the function for
-
-       You are responsible for adding a line to the EndpointPermissions Table in the DB to make this work
-       If you do not yet have this table, run this SQL then INSERT the necessary rows.
-       CREATE TABLE EndpointPermissions(
-            rowID INTEGER AUTO_INCREMENT PRIMARY KEY,
-            url NVARCHAR(255) NOT NULL,
-            isForCustomer BIT,
-            isForStaff BIT,
-            isForAdmins BIT
-        );
-     */
-    public boolean isAuthorizedForAction(String authToken, String endpoint){
-        if(tokenRepository.existsByAuthToken(authToken)){
-            Token token = tokenRepository.getByAuthToken(authToken);
-            EndpointPermission permissions = endpointpermissionRepository.getByUrl(endpoint);
-            switch (token.getRoleID().getId()){
-                case 1 -> {
-                    if (permissions.getIsForAdmins()) return true;
-                } case 2 -> {
-                    if(permissions.getIsForStaff()) return true;
-                } case 3 -> {
-                    if (permissions.getIsForCustomer()) return true;
-                }default -> {return false;}
-            }
-        }
-        return false;
     }
 
 }
