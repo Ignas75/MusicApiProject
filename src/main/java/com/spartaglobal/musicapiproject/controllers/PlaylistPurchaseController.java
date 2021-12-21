@@ -55,20 +55,30 @@ public class PlaylistPurchaseController {
            Token user = tokenRepository.getByAuthToken(token);
            Customer customer = cc.getCustomerByEmail(user.getEmail());
            if (customer != null){
-                /** Finds all the tracks based on the playlist id*/
-                List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
-                        .stream()
-                        .filter(s -> s.getId().getPlaylistId() == playListId)
-                        .toList();
 
-                /**Storing the total price of the playlist 2240*/
+               /** Finds all the tracks based on the playlist id*/
+               List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
+                       .stream()
+                       .filter(s -> s.getId().getPlaylistId() == playListId)
+                       .toList();
+               InvoiceController inv = new InvoiceController();
+               List<Track> allTracks = new ArrayList<>();
+               for (Playlisttrack t : allPlaylistTracks){
+                   allTracks.add(trackRepository.getById(t.getId().getTrackId()));
+               }
+               inv.createInvoice(allTracks, customer);
+
+
+
+/*
+                *//**Storing the total price of the playlist 2240*//*
                 totalPrice = BigDecimal.valueOf(0);
 
 
-                /** Predefine the Invoice tables invoice ID*/
+                *//** Predefine the Invoice tables invoice ID*//*
                 Invoice invoice = new Invoice();
 
-                /**Gets the cusomter object*/
+                *//**Gets the cusomter object*//*
 
                 invoice.setInvoiceDate(Instant.now());
                 invoice.setCustomerId(customer);
@@ -94,10 +104,10 @@ public class PlaylistPurchaseController {
                        batch.add(temp);
                }
                invoicelineRepository.saveAllAndFlush(batch);
-               /**Update the total in the invoice*/
+               *//**Update the total in the invoice*//*
                Optional<Invoice> inv = invoiceRepository.findById(invoice.getId());
                inv.get().setTotal(totalPrice);
-               invoiceRepository.save(invoice);
+               invoiceRepository.save(invoice);*/
                return new ResponseEntity<>("{\"message\":\"Playlist Purchase Complete\",\"Total Price\":\"" + totalPrice + "\"}", headers, HttpStatus.OK);
     }
            return new ResponseEntity<>("{\"message\":\"Customer not found\"}", headers, HttpStatus.OK);
