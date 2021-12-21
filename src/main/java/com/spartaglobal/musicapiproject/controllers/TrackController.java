@@ -54,7 +54,7 @@ public class TrackController {
         return new ResponseEntity<>("Track Created", HttpStatus.OK);
     }
 
-    @GetMapping("chinook/track")
+    @GetMapping("chinook/track/read")
     public ResponseEntity readTrack(@RequestParam Integer id){
         Track track = trackRepository.getById(id);
         return new ResponseEntity(track,HttpStatus.OK);

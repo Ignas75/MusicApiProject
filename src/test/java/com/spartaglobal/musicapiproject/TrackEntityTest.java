@@ -1,7 +1,7 @@
 package com.spartaglobal.musicapiproject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spartaglobal.musicapiproject.pojo.track.TrackPOJO;
+import com.spartaglobal.musicapiproject.pojo.TrackPOJO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

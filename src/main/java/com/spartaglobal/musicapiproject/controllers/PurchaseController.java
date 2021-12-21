@@ -2,6 +2,7 @@ package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
+import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,7 +115,7 @@ public class PurchaseController {
                                                 @RequestParam String billingAddress, @RequestParam String billingCity,
                                                 @RequestParam String billingCountry, @RequestParam String postalCode,
                                                 @RequestHeader("Authorization") String authToken){
-        AuthorizationController authorizationController = new AuthorizationController();
+        AuthorizationService authorizationController = new AuthorizationService();
         if(!authorizationController.isAuthorizedForAction(authToken.split(" ")[3], "chinook/album/purchase")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
