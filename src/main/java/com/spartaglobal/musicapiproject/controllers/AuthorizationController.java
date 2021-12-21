@@ -1,17 +1,14 @@
 package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.Employee;
-import com.spartaglobal.musicapiproject.entities.EndpointPermission;
 import com.spartaglobal.musicapiproject.entities.Role;
 import com.spartaglobal.musicapiproject.entities.Token;
 import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.EmployeeRepository;
-import com.spartaglobal.musicapiproject.repositories.EndpointPermissionRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.PopularityService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
