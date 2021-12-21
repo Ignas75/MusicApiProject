@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TrackPOJO{
 
+	public TrackPOJO() {
+	}
+
 	@JsonProperty("genreId")
 	private GenreId genreId;
 

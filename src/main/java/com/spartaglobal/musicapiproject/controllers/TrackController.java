@@ -51,7 +51,7 @@ public class TrackController {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         trackRepository.save(newTrack);
-        return new ResponseEntity<>("Track Created", HttpStatus.OK);
+        return new ResponseEntity(newTrack, HttpStatus.OK);
     }
 
     @GetMapping("chinook/track/read")
