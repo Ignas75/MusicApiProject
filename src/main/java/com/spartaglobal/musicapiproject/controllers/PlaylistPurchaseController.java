@@ -40,10 +40,13 @@ public class PlaylistPurchaseController {
     private InvoiceRepository invoiceRepository;
     BigDecimal totalPrice;
 
+    AuthorizationController auth = new AuthorizationController();
 
     //TODO Include the body to get the authentication token, to get the customer information//
-    @PostMapping(value = "/chinook/playlist")
-    public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestParam Integer customerID){
+    @PostMapping(value = "/chinook/purchase-playlist")
+    public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken){
+        if (auth.isAuthorizedForAction(authToken.split(" ")[1],"/chinook/purchase-playlist/")){
+
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
@@ -61,7 +64,7 @@ public class PlaylistPurchaseController {
         Invoice invoice = new Invoice();
 
         /**Gets the cusomter object*/
-        Customer customer = customerRepository.getById(customerID);
+        Customer customer = customerRepository.getById(1);
 
         invoice.setInvoiceDate(Instant.now());
         invoice.setCustomerId(customer);
@@ -101,6 +104,8 @@ public class PlaylistPurchaseController {
         inv.get().setTotal(totalPrice);
         invoiceRepository.save(invoice);
         return new ResponseEntity<String>("{\"message\":\"Playlist Purchase Complete\",\"Total Price\":\""+totalPrice+"\"}", headers, HttpStatus.OK);
+    }
+        return null;
     }
 
 
