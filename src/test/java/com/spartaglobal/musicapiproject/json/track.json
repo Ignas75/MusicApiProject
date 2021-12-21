@@ -1,11 +1,11 @@
 {
-  "name": "For Those About To Rock (We Salute You)",
+  "name": "Test tracks",
   "albumId": {
     "id": 1,
-    "title": "For Those About To Rock We Salute You",
+    "title": "testing tracks",
     "artistId": {
       "id": 1,
-      "name": "AC/DC"
+      "name": "AC/DC/TEST"
     }
   },
   "mediaTypeId": {
