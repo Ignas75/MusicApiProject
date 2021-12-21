@@ -45,12 +45,12 @@ public class PlaylistPurchaseController {
     private CustomerController cc = new CustomerController();
 
     //TODO Include the body to get the authentication token, to get the customer information//
-    @PostMapping(value = "/chinook/purchase-playlist")
+    @PostMapping(value = "chinook/purchase-playlist")
     public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken){
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-       if (as.isAuthorizedForAction(token,"/chinook/purchase-playlist")){
+       if (as.isAuthorizedForAction(token,"chinook/purchase-playlist")){
            //Get the customer details
            Token user = tokenRepository.getByAuthToken(token);
            Customer customer = cc.getCustomerByEmail(user.getEmail());
