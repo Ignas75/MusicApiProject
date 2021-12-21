@@ -33,9 +33,36 @@ public class UserContentSearch {
         return trackRepository.findAll();
     }
 
-    @GetMapping (value = "/chinook/search")
-    public List<? extends UserSearchable> getQuery()
-    {
-        return null;
+    @GetMapping(value = "/chinook/search")
+    public Set<UserSearchable> getQuery(@RequestParam String name) {
+        List<Track> tracks = trackRepository.findAll();
+        List<Album> albums = albumRepository.findAll();
+        List<Artist> artists = artistRepository.findAll();
+        List<Genre> genres = genreRepository.findAll();
+        List<Playlist> playlists = playlistRepository.findAll();
+
+        for (Track t : tracks) {
+            wordChecker(t, name);
+        }
+        for (Album a : albums) {
+            wordChecker(a, name);
+        }
+        for (Artist a : artists) {
+            wordChecker(a, name);
+        }
+        for (Genre g : genres) {
+            wordChecker(g, name);
+        }
+        for (Playlist p : playlists) {
+            wordChecker(p, name);
+        }
+        return searchSet;
+    }
+
+    private void wordChecker(UserSearchable list, String name) {
+        List<String> splitElement = Arrays.asList(list.userSearch().split(" "));
+        for (String split : splitElement) {
+            if (split.equalsIgnoreCase(name)) searchSet.add(list);
+        }
     }
 }
