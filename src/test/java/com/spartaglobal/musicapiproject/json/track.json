@@ -1,0 +1,23 @@
+{
+  "name": "Test tracks",
+  "albumId": {
+    "id": 1,
+    "title": "testing tracks",
+    "artistId": {
+      "id": 1,
+      "name": "AC/DC"
+    }
+  },
+  "mediaTypeId": {
+    "id": 1,
+    "name": "MPEG audio file"
+  },
+  "genreId": {
+    "id": 1,
+    "name": "Rock"
+  },
+  "composer": "Angus Young",
+  "milliseconds": 343719,
+  "bytes": 11170334,
+  "unitPrice": 0.99
+}
