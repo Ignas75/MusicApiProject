@@ -47,37 +47,37 @@ public class SalesAccess {
     }
 
     @PostMapping(value="/Chinook/new-genre")
-    public Genre createTrack(@Valid @RequestBody Genre genre1){
+    public Genre createGenre(@Valid @RequestBody Genre genre1){
         return genreRepository.save(genre1);
     }
 
     @PostMapping(value="/Chinook/new-invoice-line")
-    public Invoiceline createTrack(@Valid @RequestBody Invoiceline invoiceline){
+    public Invoiceline createInvoiceLine(@Valid @RequestBody Invoiceline invoiceline){
         return invoicelineRepository.save(invoiceline);
     }
 
     @PostMapping(value="/Chinook/new-invoice")
-    public Invoice createTrack(@Valid @RequestBody Invoice invoice){
+    public Invoice createInvoice(@Valid @RequestBody Invoice invoice){
         return invoiceRepository.save(invoice);
     }
 
     @PostMapping(value="/Chinook/new-mediatype")
-    public Mediatype createTrack(@Valid @RequestBody Mediatype mediatype){
+    public Mediatype createMediatype(@Valid @RequestBody Mediatype mediatype){
         return mediatypeRepository.save(mediatype);
     }
 
     @PostMapping(value="/Chinook/new-playlist-track")
-    public Playlisttrack createTrack(@Valid @RequestBody Playlisttrack playlisttrack){
+    public Playlisttrack createPlaylist(@Valid @RequestBody Playlisttrack playlisttrack){
         return playlisttrackRepository.save(playlisttrack);
     }
 
     @PostMapping(value="/Chinook/new-role")
-    public Role createTrack(@Valid @RequestBody Role role){
+    public Role createRole(@Valid @RequestBody Role role){
         return roleRepository.save(role);
     }
 
     @PostMapping(value="/Chinook/new-token")
-    public Token createTrack(@Valid @RequestBody Token token){
+    public Token createToken(@Valid @RequestBody Token token){
         return tokenRepository.save(token);
     }
 
@@ -85,8 +85,6 @@ public class SalesAccess {
     public Track createTrack(@Valid @RequestBody Track track1){
         return trackRepository.save(track1);
     }
-
-
 
    /* @DeleteMapping(value="/Chinook/del-album")
     public Album delAlbum(@PathVariable )
