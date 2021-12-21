@@ -5,13 +5,14 @@ import com.spartaglobal.musicapiproject.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@RestController
 public class PurchaseController {
     @Autowired
     InvoiceRepository invoiceRepository;
@@ -56,30 +57,109 @@ public class PurchaseController {
         return userTracks;
     }
 
-
-    // return album price
-    // needs to check for discounts in a discount table and whether they still apply
-    @GetMapping(value = "album/cost")
-    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId, @RequestParam Integer userId){
-        Integer customerId = customerRepository.getById(userId).getId();
+    public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId){
+        List<Track> purchasedTracksFromAlbum = new ArrayList<>();
+        Optional<Album> findAlbum = albumRepository.findById(albumId);
+        Optional<Customer> findCustomer = customerRepository.findById(customerId);
+        if(findAlbum.isEmpty() || findCustomer.isEmpty()){
+            return purchasedTracksFromAlbum;
+        }
         List<Track> userTracks = getUserTracks(customerId);
-
-        BigDecimal totalCost = new BigDecimal(0);
         for(Track track: userTracks){
-            Integer trackAlbumId = track.getAlbumId().getId();
-            if(trackAlbumId.equals(albumId)){
-                totalCost.add(track.getUnitPrice());
+            if(track.getAlbumId().getId().equals(albumId)){
+                purchasedTracksFromAlbum.add(track);
             }
         }
-        String cost = totalCost.toString();
-        return new ResponseEntity<>(cost, HttpStatus.OK);
+        return purchasedTracksFromAlbum;
+    }
+
+    public List<Track> getAlbumTracks(Integer albumId){
+        return trackRepository.findAll().stream().filter(s -> s.getAlbumId().getId().equals(albumId)).toList();
     }
 
 
+    // return album price
+    // TODO: needs to check for discounts in a discount table and whether they still apply
+    @GetMapping(value = "/chinook/album/customer/cost")
+    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId, @RequestParam Integer customerId){
+        List<Track> userTracks = getUserTracks(customerId);
+        List<Track> albumTracks = getAlbumTracks(albumId);
+        BigDecimal totalCost = new BigDecimal(0);
+        for(Track track: albumTracks){
+            if(!userTracks.contains(track)){
+                totalCost = totalCost.add(track.getUnitPrice());
+            }
+        }
+        return new ResponseEntity<>(totalCost.toString(), HttpStatus.OK);
+    }
+
+    // TODO: needs to check for discounts in a discount table and whether they still apply
+    @GetMapping(value = "/chinook/album/cost")
+    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId){
+        List<Track> albumTracks = getAlbumTracks(albumId);
+        BigDecimal totalCost = new BigDecimal(0);
+        for(Track track: albumTracks){
+            totalCost = totalCost.add(track.getUnitPrice());
+        }
+        return new ResponseEntity<>(totalCost.toString(), HttpStatus.OK);
+    }
 
 
     // purchase an album
     // need already purchased tracks from the user that belong to the current album
     // what if the same song is on another album?
+    // TODO: add discounts
+    @PostMapping(value = "chinook/album/purchase")
+    public ResponseEntity<String> purchaseAlbum(@RequestParam Integer albumId, @RequestParam Integer customerId,
+                                                @RequestParam String billingAddress, @RequestParam String billingCity,
+                                                @RequestParam String billingCountry, @RequestParam String postalCode,
+                                                @RequestHeader("Authorization") String authToken){
+        AuthorizationController authorizationController = new AuthorizationController();
+        if(!authorizationController.isAuthorizedForAction(authToken.split(" ")[3], "chinook/album/purchase")) {
+            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
+
+
+        Optional<Customer> findCustomer = customerRepository.findById(customerId);
+        // checking if the Ids are valid
+        if(findCustomer.isEmpty()){
+            return new ResponseEntity<>("No customer entry exists with that id", HttpStatus.NOT_FOUND);
+        }
+        Optional<Album> findAlbum = albumRepository.findById(albumId);
+        if(findAlbum.isEmpty()){
+            return new ResponseEntity<>("No album entry exists with that id", HttpStatus.NOT_FOUND);
+        }
+        Customer customer = findCustomer.get();
+
+        List<Track> purchasedTracksFromAlbum = getUserPurchasedTracksFromAlbum(customerId, albumId);
+        List<Track> albumTracks = getAlbumTracks(albumId);
+        List<Track> tracksToPurchase = new ArrayList<>();
+        BigDecimal totalCost = new BigDecimal(0);
+        for(Track track: albumTracks){
+            if(!purchasedTracksFromAlbum.contains(track)){
+                tracksToPurchase.add(track);
+                totalCost = totalCost.add(track.getUnitPrice());
+            }
+        }
+        if(!tracksToPurchase.isEmpty()){
+            Invoice invoice = new Invoice();
+            invoice.setBillingAddress(billingAddress);
+            invoice.setBillingCity(billingCity);
+            invoice.setBillingCountry(billingCountry);
+            invoice.setBillingPostalCode(postalCode);
+            invoice.setCustomerId(customer);
+            invoice.setTotal(totalCost);
+            invoiceRepository.save(invoice);
+            for(Track track: tracksToPurchase){
+                Invoiceline invoiceline = new Invoiceline();
+                invoiceline.setInvoiceId(invoice);
+                invoiceline.setQuantity(1);
+                invoiceline.setUnitPrice(track.getUnitPrice());
+                invoicelineRepository.save(invoiceline);
+            }
+        }
+        return new ResponseEntity<>("Successfully registered purchase of " + tracksToPurchase.size() + " tracks",
+                HttpStatus.OK);
+    }
 
 }
