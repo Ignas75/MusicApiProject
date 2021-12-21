@@ -1,6 +1,7 @@
 package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.Album;
+import com.spartaglobal.musicapiproject.entities.Playlist;
 import com.spartaglobal.musicapiproject.entities.Track;
 import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
 import com.spartaglobal.musicapiproject.repositories.TrackRepository;
@@ -24,6 +25,15 @@ public class AlbumController {
     @Autowired
     private TrackController trackController;
 
+    @GetMapping(value = "/chinook/album")
+    public Album getTrack(@RequestParam Integer id) {
+        Optional<Album> result = albumRepo.findById(id);
+        if(result.isPresent()){
+            return result.get();
+        } else {
+            return null;
+        }
+    }
 
     @Transactional
     @DeleteMapping(value = "/chinook/delete/album")
@@ -35,6 +45,7 @@ public class AlbumController {
         }
         albumRepo.deleteById(id);
     }
+
 
     @PostMapping(value="/Chinook/new-album")
     public Album createAlbum(@Valid @RequestBody Album album1){
