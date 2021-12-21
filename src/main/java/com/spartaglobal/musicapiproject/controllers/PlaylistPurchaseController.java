@@ -2,24 +2,19 @@ package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
+import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.net.http.HttpResponse;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
 @RestController
 public class PlaylistPurchaseController {
 
@@ -40,14 +35,13 @@ public class PlaylistPurchaseController {
     private InvoiceRepository invoiceRepository;
     BigDecimal totalPrice;
 
-    AuthorizationController auth = new AuthorizationController();
+    @Autowired
+    private AuthorizationService as = new AuthorizationService();
 
     //TODO Include the body to get the authentication token, to get the customer information//
     @PostMapping(value = "/chinook/purchase-playlist")
     public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken){
-        if (auth.isAuthorizedForAction(authToken.split(" ")[1],"/chinook/purchase-playlist/")){
-
-
+       if (as.isAuthorizedForAction(authToken.split(" ")[1],"/chinook/purchase-playlist")){
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
 
@@ -106,7 +100,7 @@ public class PlaylistPurchaseController {
         return new ResponseEntity<String>("{\"message\":\"Playlist Purchase Complete\",\"Total Price\":\""+totalPrice+"\"}", headers, HttpStatus.OK);
     }
         return null;
-    }
+   }
 
 
 
