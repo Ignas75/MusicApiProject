@@ -44,7 +44,9 @@ public class PlaylistPurchaseController {
     @Autowired
     private CustomerController cc = new CustomerController();
 
-    //TODO Include the body to get the authentication token, to get the customer information//
+    @Autowired
+    private InvoiceController inv = new InvoiceController();
+
     @PostMapping(value = "chinook/purchase-playlist")
     public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken){
         String token = authToken.split(" ")[1];
@@ -61,7 +63,7 @@ public class PlaylistPurchaseController {
                        .stream()
                        .filter(s -> s.getId().getPlaylistId() == playListId)
                        .toList();
-               InvoiceController inv = new InvoiceController();
+
                List<Track> allTracks = new ArrayList<>();
                for (Playlisttrack t : allPlaylistTracks){
                    allTracks.add(trackRepository.getById(t.getId().getTrackId()));
@@ -108,7 +110,7 @@ public class PlaylistPurchaseController {
                Optional<Invoice> inv = invoiceRepository.findById(invoice.getId());
                inv.get().setTotal(totalPrice);
                invoiceRepository.save(invoice);*/
-               return new ResponseEntity<>("{\"message\":\"Playlist Purchase Complete\",\"Total Price\":\"" + totalPrice + "\"}", headers, HttpStatus.OK);
+               return new ResponseEntity<>("{\"message\":\"Playlist Purchase Complete\"}", headers, HttpStatus.OK);
     }
            return new ResponseEntity<>("{\"message\":\"Customer not found\"}", headers, HttpStatus.OK);
        }

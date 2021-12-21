@@ -32,14 +32,20 @@ public class InvoiceController {
         Invoice newInvoice = new Invoice();
         newInvoice.setInvoiceDate(Instant.now());
         newInvoice.setBillingAddress(customer.getAddress());
+        newInvoice.setBillingCountry(customer.getCountry());
         newInvoice.setBillingCity(customer.getCity());
+        newInvoice.setBillingState(customer.getState());
         newInvoice.setBillingPostalCode(customer.getPostalCode());
         newInvoice.setCustomerId(customer);
-        BigDecimal total = null;
+        BigDecimal total = BigDecimal.valueOf(0);
         for (int i = 0; i < tracks.size(); i++) {
-            total.add(tracks.get(i).getUnitPrice());
-            createInvoiceLine(newInvoice, tracks.get(i));
+            total = total.add(tracks.get(i).getUnitPrice());
         }
+        newInvoice.setTotal(total);
+        invoiceRepository.save(newInvoice);
+        for (int i = 0; i < tracks.size(); i++) {
+            createInvoiceLine(newInvoice, tracks.get(i));
+         }
     }
     private void createInvoiceLine(Invoice invoice, Track track){
         Invoiceline invoiceLine = new Invoiceline();
