@@ -57,7 +57,6 @@ public class PlaylistPurchaseController {
            Token user = tokenRepository.getByAuthToken(token);
            Customer customer = cc.getCustomerByEmail(user.getEmail());
            if (customer != null){
-
                /** Finds all the tracks based on the playlist id*/
                List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
                        .stream()
@@ -69,9 +68,6 @@ public class PlaylistPurchaseController {
                    allTracks.add(trackRepository.getById(t.getId().getTrackId()));
                }
                inv.createInvoice(allTracks, customer);
-
-
-
 /*
                 *//**Storing the total price of the playlist 2240*//*
                 totalPrice = BigDecimal.valueOf(0);
