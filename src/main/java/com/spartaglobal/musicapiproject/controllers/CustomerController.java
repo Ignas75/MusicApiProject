@@ -79,8 +79,10 @@ public class CustomerController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
         String token[] = authToken.split("chinook/sales/delete/customer");
-        if (aS.isAuthorizedForAction(token[1], ""))
-        return new ResponseEntity<>("{\"message\":\"Invalid Request\"}",headers, HttpStatus.BAD_REQUEST);
+        if (aS.isAuthorizedForAction(token[1], "")) {
+            return new ResponseEntity<>("{\"message\":\"Invalid Request\"}", headers, HttpStatus.BAD_REQUEST);
+        }
+        return null;
     }
 
 
@@ -114,6 +116,7 @@ public class CustomerController {
         customer.get().setPhone(customer1.getPhone());
         customer.get().setFax(customer1.getFax());
         customer.get().setEmail(customer1.getEmail());
+
         String message = "{\"messsage\" : \"Customer Update\", \"customer\":";
         String vals = " {\"id\":\"" + customer1.getId() + "\",\"firstName\":\"" + customer1.getFirstName() +
                          "\",\"lastName\":\"" + customer1.getLastName() +"\",\"company\":\"" + customer1.getCompany() +
@@ -153,7 +156,9 @@ public class CustomerController {
             final Customer updatesCustomer = customerRepository.save(customer1);
             return ResponseEntity.ok(updatesCustomer);
         } else
-            return null; 
+            
+            return null;
+
     }
 }
 
