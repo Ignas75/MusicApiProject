@@ -5,4 +5,6 @@ import com.spartaglobal.musicapiproject.entities.PlaylisttrackId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PlaylisttrackRepository extends JpaRepository<Playlisttrack, PlaylisttrackId> {
+    public void deleteByIdTrackId(Integer id);
+    public void deleteByIdPlaylistId(Integer id);
 }
