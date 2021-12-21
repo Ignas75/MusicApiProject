@@ -34,67 +34,87 @@ public class PlaylistPurchaseController {
     private InvoiceRepository invoiceRepository;
     BigDecimal totalPrice;
 
+
+    @Autowired
+    private TokenRepository tokenRepository;
+
     @Autowired
     private AuthorizationService as = new AuthorizationService();
 
-    //TODO Include the body to get the authentication token, to get the customer information//
-    @PostMapping(value = "/chinook/purchase-playlist")
+    @Autowired
+    private CustomerController cc = new CustomerController();
+
+    @Autowired
+    private InvoiceController inv = new InvoiceController();
+
+    @PostMapping(value = "chinook/purchase-playlist")
     public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken){
-       if (as.isAuthorizedForAction(authToken.split(" ")[1],"/chinook/purchase-playlist")){
+        String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
+       if (as.isAuthorizedForAction(token,"chinook/purchase-playlist")){
+           //Get the customer details
+           Token user = tokenRepository.getByAuthToken(token);
+           Customer customer = cc.getCustomerByEmail(user.getEmail());
+           if (customer != null){
 
-        /** Finds all the tracks based on the playlist id*/
-        List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll().stream().filter(s -> s.getId().getPlaylistId() == playListId).toList();
+               /** Finds all the tracks based on the playlist id*/
+               List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
+                       .stream()
+                       .filter(s -> s.getId().getPlaylistId() == playListId)
+                       .toList();
 
-        /**Storing the total price of the playlist 2240*/
-        totalPrice = BigDecimal.valueOf(0);
-
-
-        /** Predefine the Invoice tables invoice ID*/
-        Invoice invoice = new Invoice();
-
-        /**Gets the cusomter object*/
-        Customer customer = customerRepository.getById(1);
-
-        invoice.setInvoiceDate(Instant.now());
-        invoice.setCustomerId(customer);
-        invoice.setBillingAddress(customer.getAddress());
-        invoice.setBillingState(customer.getState());
-        invoice.setBillingCity(customer.getCity());
-        invoice.setBillingCountry(customer.getCountry());
-        invoice.setBillingPostalCode(customer.getPostalCode());
-        invoice.setTotal(totalPrice);
-        invoiceRepository.save(invoice);
-
-       List<Invoiceline> batch = new ArrayList<>();
-
-       for (Playlisttrack p : allPlaylistTracks){
-               Invoiceline temp = new Invoiceline();
-               temp.setInvoiceId(invoice);
-               Track track = trackRepository.getById(p.getId().getTrackId());
-                BigDecimal unitPrice = track.getUnitPrice();
-                totalPrice = unitPrice.add(totalPrice);
-               temp.setTrackId(track);
-               temp.setUnitPrice(track.getUnitPrice());
-               temp.setQuantity(1);
-               batch.add(temp);
-       }
+               List<Track> allTracks = new ArrayList<>();
+               for (Playlisttrack t : allPlaylistTracks){
+                   allTracks.add(trackRepository.getById(t.getId().getTrackId()));
+               }
+               inv.createInvoice(allTracks, customer);
 
 
-       invoicelineRepository.saveAllAndFlush(batch);
-        /**Update the total in the invoice*/
-        Optional<Invoice> inv = invoiceRepository.findById(invoice.getId());
-        inv.get().setTotal(totalPrice);
-        invoiceRepository.save(invoice);
-        return new ResponseEntity<String>("{\"message\":\"Playlist Purchase Complete\",\"Total Price\":\""+totalPrice+"\"}", headers, HttpStatus.OK);
+
+/*
+                *//**Storing the total price of the playlist 2240*//*
+                totalPrice = BigDecimal.valueOf(0);
+
+
+                *//** Predefine the Invoice tables invoice ID*//*
+                Invoice invoice = new Invoice();
+
+                *//**Gets the cusomter object*//*
+
+                invoice.setInvoiceDate(Instant.now());
+                invoice.setCustomerId(customer);
+                invoice.setBillingAddress(customer.getAddress());
+                invoice.setBillingState(customer.getState());
+                invoice.setBillingCity(customer.getCity());
+                invoice.setBillingCountry(customer.getCountry());
+                invoice.setBillingPostalCode(customer.getPostalCode());
+                invoice.setTotal(totalPrice);
+                invoiceRepository.save(invoice);
+
+                List<Invoiceline> batch = new ArrayList<>();
+
+               for (Playlisttrack p : allPlaylistTracks){
+                       Invoiceline temp = new Invoiceline();
+                       temp.setInvoiceId(invoice);
+                       Track track = trackRepository.getById(p.getId().getTrackId());
+                        BigDecimal unitPrice = track.getUnitPrice();
+                        totalPrice = unitPrice.add(totalPrice);
+                       temp.setTrackId(track);
+                       temp.setUnitPrice(track.getUnitPrice());
+                       temp.setQuantity(1);
+                       batch.add(temp);
+               }
+               invoicelineRepository.saveAllAndFlush(batch);
+               *//**Update the total in the invoice*//*
+               Optional<Invoice> inv = invoiceRepository.findById(invoice.getId());
+               inv.get().setTotal(totalPrice);
+               invoiceRepository.save(invoice);*/
+               return new ResponseEntity<>("{\"message\":\"Playlist Purchase Complete\"}", headers, HttpStatus.OK);
     }
-        return null;
-   }
-
-
-
-
-
+           return new ResponseEntity<>("{\"message\":\"Customer not found\"}", headers, HttpStatus.OK);
+       }
+       return new ResponseEntity<>("{\"message\":\"Access Denied\"}", headers, HttpStatus.OK);
+    }
 
 }
