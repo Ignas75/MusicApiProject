@@ -16,7 +16,14 @@ import java.util.Optional;
 
 
 /***
- * Please add following lines of sql query into the database after the end
+ * Please add following lines of sql query into the database after running the endpointpermissions query from AuthorizationService class
+ *
+  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/sales/customer", 0,1,1);
+  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/customer", 1,0,0);
+  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/sales/update", 0,1,1);
+  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/sales/delete/customer", 0,0,1);
+  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("", 0,0,0);
+ *
  */
 
 
@@ -73,20 +80,20 @@ public class CustomerController {
         return new ResponseEntity<>("{\"message\":\"Invalid Request\"}",headers, HttpStatus.BAD_REQUEST);
     }
 
-
+    //**TODO Check this if we need this or not */
     @DeleteMapping(value = "chinook/sales/delete/customer")
     public ResponseEntity<?> deleteCustomerByCustomerID(@RequestParam Integer customerID, @RequestHeader("Authorization") String authToken){
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-        String token[] = authToken.split("chinook/sales/delete/customer");
-        if (aS.isAuthorizedForAction(token[1], "")) {
-            return new ResponseEntity<>("{\"message\":\"Invalid Request\"}", headers, HttpStatus.BAD_REQUEST);
+        String token[] = authToken.split(" ");
+        if (aS.isAuthorizedForAction(token[1], "chinook/sales/delete/customer")) {
+            if (customerRepository.existsById(customerID)){
+                Customer customer = customerRepository.getById(customerID);
+                customerRepository.delete(customer);
+            }
         }
-        return null;
+        return new ResponseEntity<>("{\"message\":\"Invalid Request\"}", headers, HttpStatus.BAD_REQUEST);
     }
-
-
-
 
 
 
