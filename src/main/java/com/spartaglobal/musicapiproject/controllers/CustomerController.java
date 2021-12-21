@@ -92,7 +92,7 @@ public class CustomerController {
     public ResponseEntity<?> updateCustomerByEmailAddress( @RequestParam Customer customer1, @RequestHeader("Authorization") String authToken){
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type","application/json");
-        String token[] = authToken.split("");
+        String token[] = authToken.split(" ");
         if(aS.isAuthorizedForAction(token[1],"chinook/sales/update")){
             Token userToken = tokenRepository.getByAuthToken(token[1]);
             Customer customer = customerRepository.getCustomerByEmail(userToken.getEmail());
@@ -114,7 +114,46 @@ public class CustomerController {
         customer.get().setPhone(customer1.getPhone());
         customer.get().setFax(customer1.getFax());
         customer.get().setEmail(customer1.getEmail());
-        String message = "{\"messsage\" : \"Customer Update\", \"film\":";
+        String message = "{\"messsage\" : \"Customer Update\", \"customer\":";
+        String vals = " {\"id\":\"" + customer1.getId() + "\",\"firstName\":\"" + customer1.getFirstName() +
+                         "\",\"lastName\":\"" + customer1.getLastName() +"\",\"company\":\"" + customer1.getCompany() +
+                "\",\"Address\":\"" + customer1.getAddress() +"\",\"city\":\"" + customer1.getCity() +
+                "\",\"State\":\"" + customer1.getState() + "\",\"country\":\"" + customer1.getCountry()+
+                "\",\"postal code\":\"" + customer1.getPostalCode() + "\",\"phone\":\"" + customer1.getPhone()+
+                "\",\"fax\":\"" + customer1.getFax() + "\",\"email\":\"" + customer1.getEmail() + "\"}";
+        String bodymessage = message + vals + "}";
+        return new ResponseEntity<String>(bodymessage, headers, HttpStatus.OK);
+    }
+
+    @PutMapping(value="/chinook/sales/new-customer")
+    public ResponseEntity<Customer> newCustomerHere(@RequestParam Customer customer1, @RequestHeader("Authorization") String authToken){
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type","application/json");
+        String token[] = authToken.split(" ");
+        if(aS.isAuthorizedForAction(token[1],"chinook/sales/new-customer")){
+            Token userToken = tokenRepository.getByAuthToken(token[1]);
+            Customer customer = customerRepository.getCustomerByEmail(userToken.getEmail());
+            if(customer != null)
+                return ResponseEntity.ok(customer);
+        }
+        Optional<Customer> customer = customerRepository.findById(customer1.getId());
+        if(customer.isPresent()){
+            customer.get().setId(customer1.getId());
+            customer.get().setFirstName(customer1.getFirstName());
+            customer.get().setLastName(customer1.getLastName());
+            customer.get().setCompany(customer1.getCompany());
+            customer.get().setAddress(customer1.getAddress());
+            customer.get().setCity(customer1.getCity());
+            customer.get().setState(customer1.getState());
+            customer.get().setCountry(customer1.getCountry());
+            customer.get().setPostalCode(customer1.getPostalCode());
+            customer.get().setPhone(customer1.getPhone());
+            customer.get().setFax(customer1.getFax());
+            customer.get().setEmail(customer1.getEmail());
+            final Customer updatesCustomer = customerRepository.save(customer1);
+            return ResponseEntity.ok(updatesCustomer);
+        } else
+            return null; 
     }
 }
 
