@@ -3,8 +3,8 @@ package com.spartaglobal.musicapiproject.entities;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "endpointpermissions")
-public class Endpointpermission {
+@Table(name = "EndpointPermissions")
+public class EndpointPermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "rowID", nullable = false)
