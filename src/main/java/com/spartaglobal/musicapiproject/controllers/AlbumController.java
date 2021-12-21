@@ -41,7 +41,7 @@ public class AlbumController {
         return albumRepo.save(album1);
     }
 
-    @PatchMapping(value="/Chinook/update-album/{id}")
+    @PatchMapping(value="/Chinook/update-album")
     public Album updateAlbum(@Valid @RequestBody Album id ){
         Optional<Album> res = albumRepo.findById(id.getId());
         if(res.isPresent()){

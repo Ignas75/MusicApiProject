@@ -40,7 +40,7 @@ public class TrackController {
         return trackRepo.save(track1);
     }
 
-    @PatchMapping(value="/Chinook/update-playlist")
+    @PatchMapping(value="/Chinook/update-track")
     public Track updateAlbum(@Valid @RequestBody Track track1){
         Optional<Track> res = trackRepo.findById(track1.getId());
         if(res.isPresent()){
