@@ -1,22 +1,21 @@
 package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.Employee;
+import com.spartaglobal.musicapiproject.entities.EndpointPermission;
 import com.spartaglobal.musicapiproject.entities.Role;
 import com.spartaglobal.musicapiproject.entities.Token;
 import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.EmployeeRepository;
+import com.spartaglobal.musicapiproject.repositories.EndpointPermissionRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
+import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +25,8 @@ public class AuthorizationController {
 
     private static final String validCharset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTYUVWXYZ0123456789";
 
+    @Autowired
+    private AuthorizationService as = new AuthorizationService();
     @Autowired
     private TokenRepository tokenRepository;
     @Autowired
@@ -90,6 +91,28 @@ public class AuthorizationController {
         } else {
             return new ResponseEntity<>("{\"message\": \"email address not registered\"}", headers, HttpStatus.NOT_FOUND);
         }
+    }
+
+    // THESE ARE PROOF OF CONCEPT URLS FOR THE AUTH SYSTEM
+    @GetMapping("chinook/customer-page")
+    public ResponseEntity<String> testFunction(@RequestHeader("Authorization") String authToken){
+        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer-page")) {
+            return new ResponseEntity<>("Authorized", HttpStatus.OK);
+        } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("chinook/employee-page")
+    public ResponseEntity<String> testFunction2(@RequestHeader("Authorization") String authToken){
+        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/employee-page")) {
+            return new ResponseEntity<>("Authorized", HttpStatus.OK);
+        } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("chinook/admin-page")
+    public ResponseEntity<String> testFunction3(@RequestHeader("Authorization") String authToken){
+        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/admin-page")) {
+            return new ResponseEntity<>("Authorized", HttpStatus.OK);
+        } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
     }
 
 }
