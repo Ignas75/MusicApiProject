@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@RestController
 public class PurchaseController {
     @Autowired
     InvoiceRepository invoiceRepository;
@@ -79,32 +80,28 @@ public class PurchaseController {
 
     // return album price
     // TODO: needs to check for discounts in a discount table and whether they still apply
-    @GetMapping(value = "chinook/album/customer/cost")
+    @GetMapping(value = "/chinook/album/customer/cost")
     public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId, @RequestParam Integer customerId){
         List<Track> userTracks = getUserTracks(customerId);
-
+        List<Track> albumTracks = getAlbumTracks(albumId);
         BigDecimal totalCost = new BigDecimal(0);
-        for(Track track: userTracks){
-            Integer trackAlbumId = track.getAlbumId().getId();
-            if(trackAlbumId.equals(albumId)){
-                totalCost.add(track.getUnitPrice());
+        for(Track track: albumTracks){
+            if(!userTracks.contains(track)){
+                totalCost = totalCost.add(track.getUnitPrice());
             }
         }
-        String cost = totalCost.toString();
-        return new ResponseEntity<>(cost, HttpStatus.OK);
+        return new ResponseEntity<>(totalCost.toString(), HttpStatus.OK);
     }
 
     // TODO: needs to check for discounts in a discount table and whether they still apply
-    @GetMapping(value = "chinook/album/cost")
+    @GetMapping(value = "/chinook/album/cost")
     public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId){
         List<Track> albumTracks = getAlbumTracks(albumId);
-        System.out.println(albumTracks);
         BigDecimal totalCost = new BigDecimal(0);
         for(Track track: albumTracks){
-            totalCost.add(track.getUnitPrice());
+            totalCost = totalCost.add(track.getUnitPrice());
         }
-        String cost = totalCost.toString();
-        return new ResponseEntity<>(cost, HttpStatus.OK);
+        return new ResponseEntity<>(totalCost.toString(), HttpStatus.OK);
     }
 
 
@@ -141,7 +138,7 @@ public class PurchaseController {
         for(Track track: albumTracks){
             if(!purchasedTracksFromAlbum.contains(track)){
                 tracksToPurchase.add(track);
-                totalCost.add(track.getUnitPrice());
+                totalCost = totalCost.add(track.getUnitPrice());
             }
         }
         if(!tracksToPurchase.isEmpty()){
