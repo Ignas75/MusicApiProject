@@ -31,7 +31,7 @@ public class AuthorizationService {
             isForAdmins BIT
         );
      */
-    
+
     public boolean isAuthorizedForAction(String authToken, String endpoint){
         if(tokenRepository.existsByAuthToken(authToken)){
             Token token = tokenRepository.getByAuthToken(authToken);

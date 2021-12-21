@@ -9,7 +9,9 @@ import com.spartaglobal.musicapiproject.repositories.EmployeeRepository;
 import com.spartaglobal.musicapiproject.repositories.EndpointPermissionRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.PopularityService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,8 @@ public class AuthorizationController {
 
     @Autowired
     private AuthorizationService as = new AuthorizationService();
+    @Autowired
+    private PopularityService popularityService = new PopularityService();
     @Autowired
     private TokenRepository tokenRepository;
     @Autowired
@@ -109,9 +113,9 @@ public class AuthorizationController {
     }
 
     @GetMapping("chinook/admin-page")
-    public ResponseEntity<String> testFunction3(@RequestHeader("Authorization") String authToken){
+    public ResponseEntity<?> testFunction3(@RequestHeader("Authorization") String authToken){
         if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/admin-page")) {
-            return new ResponseEntity<>("Authorized", HttpStatus.OK);
+            return new ResponseEntity<>(popularityService.findMostPopularItems("Album", 10), HttpStatus.OK);
         } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
     }
 

@@ -56,8 +56,8 @@ public class InvoiceController {
     @DeleteMapping("chinook/invoice/delete")
     public ResponseEntity deleteInvoice(@RequestHeader("Authorization") String authTokenHeader,@RequestParam Integer id){
         String token = authTokenHeader.split(" ")[1];
-        AuthorizationService ac = new AuthorizationService();
-        if (!ac.isAuthorizedForAction(token,"chinook/invoice/delete")){
+        AuthorizationService as = new AuthorizationService();
+        if (!as.isAuthorizedForAction(token,"chinook/invoice/delete")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         invoiceRepository.delete(invoiceRepository.getById(id));
