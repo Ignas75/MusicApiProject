@@ -79,7 +79,7 @@ public class PurchaseController {
 
     // return album price
     // TODO: needs to check for discounts in a discount table and whether they still apply
-    @GetMapping(value = "album/cost")
+    @GetMapping(value = "chinook/album/customer/cost")
     public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId, @RequestParam Integer customerId){
         List<Track> userTracks = getUserTracks(customerId);
 
@@ -94,18 +94,31 @@ public class PurchaseController {
         return new ResponseEntity<>(cost, HttpStatus.OK);
     }
 
+    // TODO: needs to check for discounts in a discount table and whether they still apply
+    @GetMapping(value = "chinook/album/cost")
+    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId){
+        List<Track> albumTracks = getAlbumTracks(albumId);
+        System.out.println(albumTracks);
+        BigDecimal totalCost = new BigDecimal(0);
+        for(Track track: albumTracks){
+            totalCost.add(track.getUnitPrice());
+        }
+        String cost = totalCost.toString();
+        return new ResponseEntity<>(cost, HttpStatus.OK);
+    }
+
 
     // purchase an album
     // need already purchased tracks from the user that belong to the current album
     // what if the same song is on another album?
     // TODO: add discounts
-    @PostMapping(value = "album/purchase")
+    @PostMapping(value = "chinook/album/purchase")
     public ResponseEntity<String> purchaseAlbum(@RequestParam Integer albumId, @RequestParam Integer customerId,
                                                 @RequestParam String billingAddress, @RequestParam String billingCity,
                                                 @RequestParam String billingCountry, @RequestParam String postalCode,
                                                 @RequestHeader("Authorization") String authToken){
         AuthorizationController authorizationController = new AuthorizationController();
-        if(!authorizationController.isAuthorizedForAction(authToken.split(" ")[3], "album/purchase")) {
+        if(!authorizationController.isAuthorizedForAction(authToken.split(" ")[3], "chinook/album/purchase")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
 
