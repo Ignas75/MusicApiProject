@@ -79,8 +79,10 @@ public class CustomerController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
         String token[] = authToken.split("chinook/sales/delete/customer");
-        if (aS.isAuthorizedForAction(token[1], ""))
-        return new ResponseEntity<>("{\"message\":\"Invalid Request\"}",headers, HttpStatus.BAD_REQUEST);
+        if (aS.isAuthorizedForAction(token[1], "")) {
+            return new ResponseEntity<>("{\"message\":\"Invalid Request\"}", headers, HttpStatus.BAD_REQUEST);
+        }
+        return null;
     }
 
 
@@ -115,6 +117,7 @@ public class CustomerController {
         customer.get().setFax(customer1.getFax());
         customer.get().setEmail(customer1.getEmail());
         String message = "{\"messsage\" : \"Customer Update\", \"film\":";
+        return null;
     }
 }
 
