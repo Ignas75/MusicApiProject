@@ -1,11 +1,13 @@
 package com.spartaglobal.musicapiproject.entities;
 
+import org.apache.catalina.User;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "track")
-public class Track {
+public class Track implements UserSearchable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TrackId", nullable = false)
@@ -108,5 +110,10 @@ public class Track {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String userSearch() {
+        return name;
     }
 }
