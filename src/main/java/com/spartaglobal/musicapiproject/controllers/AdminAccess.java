@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
 
-public class SalesAccess {
+public class AdminAccess {
 
     @Autowired
     private AlbumRepository albumRepository;
