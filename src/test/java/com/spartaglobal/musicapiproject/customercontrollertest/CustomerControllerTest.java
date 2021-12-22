@@ -1,4 +1,4 @@
-package com.spartaglobal.musicapiproject;
+package com.spartaglobal.musicapiproject.customercontrollertest;
 
 
 import com.spartaglobal.musicapiproject.pojo.Customer;
@@ -16,7 +16,7 @@ public class CustomerControllerTest {
 
     @BeforeAll
     public static void getJson(){
-        customerAdd = customerUtil.jsonConverter();
+        customerAdd = customerUtil.jsonConverter("application/json");
         if (customerAdd.getCustomer() != null){
             customer = customerAdd.getCustomer();
         }
@@ -75,6 +75,9 @@ public class CustomerControllerTest {
     public void getCustomerMessageTest(){
         Assertions.assertTrue(customerAdd.getMessage().equals("Your Account Details"));
     }
+
+
+
 
 
 
