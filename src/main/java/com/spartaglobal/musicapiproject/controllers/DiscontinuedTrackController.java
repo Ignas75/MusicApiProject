@@ -1,6 +1,8 @@
 package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.DiscontinuedTrack;
+import com.spartaglobal.musicapiproject.entities.Track;
 import com.spartaglobal.musicapiproject.repositories.DiscontinuedTrackRepository;
+import com.spartaglobal.musicapiproject.repositories.TrackRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,9 @@ public class DiscontinuedTrackController {
     @Autowired
     private AuthorizationService authorizationService;
 
+    @Autowired
+    private TrackRepository trackRepository;
+
     @GetMapping(value = "/chinook/discontinuedtrack")
     public Optional<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
         Optional<DiscontinuedTrack> result = discontinuedTrackRepository.findById(id);
@@ -27,7 +32,7 @@ public class DiscontinuedTrackController {
     @DeleteMapping(value = "/chinook/discontinuedtrack/delete")
     public ResponseEntity deleteDiscontinuedTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (authorizationService.isAuthorizedForAction(token, "chinook/discontinuedtrack/delete")) {
+        if (!authorizationService.isAuthorizedForAction(token, "/chinook/discontinuedtrack/delete")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         discontinuedTrackRepository.deleteById(id);
@@ -35,12 +40,18 @@ public class DiscontinuedTrackController {
     }
 
     @PostMapping(value = "/chinook/discontinuedtrack/insert")
-    public ResponseEntity insertDiscontinuedTrack(@RequestBody DiscontinuedTrack track, @RequestHeader("Authorization") String authTokenHeader) {
+    public ResponseEntity insertDiscontinuedTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (authorizationService.isAuthorizedForAction(token, "chinook/discontinuedtrack/insert")) {
+        if (!authorizationService.isAuthorizedForAction(token, "/chinook/discontinuedtrack/insert")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
-        discontinuedTrackRepository.save(track);
+        DiscontinuedTrack dct = new DiscontinuedTrack();
+        Optional<Track> findTrack = trackRepository.findById(id);
+        if (findTrack.isEmpty()) {
+            return new ResponseEntity("Track not found", HttpStatus.NOT_FOUND);
+        }
+        dct.setTrackId(findTrack.get());
+        discontinuedTrackRepository.save(dct);
         return new ResponseEntity("Track inserted into discontinued", HttpStatus.OK);
     }
 
