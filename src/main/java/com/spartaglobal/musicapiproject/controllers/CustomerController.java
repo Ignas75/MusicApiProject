@@ -34,23 +34,23 @@ public class CustomerController {
     private InvoiceService is;
 
 
-    @PostMapping("/chinook/customer/create")
+    @PostMapping("chinook/customer/create")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
         customerRepository.save(newCustomer);
         return new ResponseEntity("Customer Created", HttpStatus.OK);
     }
 
-    @GetMapping("/chinook/customer")
+    @GetMapping("chinook/customer")
     public ResponseEntity<Customer> readCustomer(@RequestParam Integer id) {
         Customer customer = customerRepository.getById(id);
         return new ResponseEntity(customer, HttpStatus.OK);
     }
 
 
-    @PutMapping("/chinook/customer/update")
+    @PutMapping("chinook/customer/update")
     public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+        if (!as.isAuthorizedForAction(token, "chinook/customer/create")) {
             return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Customer> oldState = customerRepository.findById(newState.getId());
@@ -60,10 +60,10 @@ public class CustomerController {
     }
 
 
-    @DeleteMapping("/chinook/customer/delete")
+    @DeleteMapping("chinook/customer/delete")
     public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+        if (!as.isAuthorizedForAction(token, "chinook/customer/delete")) {
 
             return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
