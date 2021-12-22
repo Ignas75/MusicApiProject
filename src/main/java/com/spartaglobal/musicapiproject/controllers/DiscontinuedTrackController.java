@@ -23,6 +23,7 @@ public class DiscontinuedTrackController {
     @Autowired
     private TrackRepository trackRepository;
 
+    // TODO: check if authentication would be advised to used here
     @GetMapping(value = "/chinook/discontinuedtrack")
     public ResponseEntity<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
         Optional<DiscontinuedTrack> result = discontinuedTrackRepository.findById(id);

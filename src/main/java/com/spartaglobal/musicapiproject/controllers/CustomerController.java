@@ -35,11 +35,18 @@ public class CustomerController {
 
 
     @PostMapping("/chinook/customer/create")
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
+    public ResponseEntity<Customer> createCustomer(@RequestHeader("Authorization") String authTokenHeader,
+                                                   @RequestBody Customer newCustomer) {
+        String token = authTokenHeader.split(" ")[1];
+        if (!as.isAuthorizedForAction(token, "chinook/customer/create")) {
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
         customerRepository.save(newCustomer);
         return new ResponseEntity("Customer Created", HttpStatus.OK);
     }
 
+    // should require authentication to prevent accessing other people's data via id tests?
+    // TODO: deal with customer not found/doesn't exist in response entity
     @GetMapping("/chinook/customer")
     public ResponseEntity<Customer> readCustomer(@RequestParam Integer id) {
         Customer customer = customerRepository.getById(id);
@@ -50,7 +57,7 @@ public class CustomerController {
     @PutMapping("/chinook/customer/update")
     public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+        if (!as.isAuthorizedForAction(token, "chinook/customer/update")) {
             return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Customer> oldState = customerRepository.findById(newState.getId());
@@ -59,18 +66,7 @@ public class CustomerController {
         return new ResponseEntity("Customer updated", HttpStatus.OK);
     }
 
-
-    @DeleteMapping("/chinook/customer/delete")
-    public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
-        String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
-
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        customerRepository.delete(customerRepository.getById(id));
-        return new ResponseEntity("Customer deleted", HttpStatus.OK);
-    }
-
+    // TODO: check if needs to have authentication to prevent customers accessing each other's tracks
     @GetMapping("/chinook/customer/tracks")
     public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
         Customer customer = customerRepository.getById(customerId);
@@ -84,6 +80,7 @@ public class CustomerController {
     }
 
 
+    // TODO: move to service since it is used elsewhere in AlbumController
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
         Album album = albumRepository.getById(albumId);
         List<Track> customerTracks = getCustomerTracks(customerId);

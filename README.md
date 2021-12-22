@@ -61,30 +61,29 @@ If a user wants to effectively log out, this is the process for deleting their c
     &emsp;Required - id - Integer\
 **Return Value** HTTP Response of type ```application/json``` representing the Artist or NULL of type ```application/text```if not found\
 
-**Endpoint:** /chinook/customer
-**Requires Authentication:** NO 
-**Parameter List**
-    &emsp;Required - id - Integer 
-**Return Value** HTTP Response of type ```application/json``` representing the customer found with status 200
+**Endpoint:** /chinook/customer\
+**Requires Authentication:** NO\
+**Parameter List**\
+    &emsp;Required - id - Integer\
+**Return Value** HTTP Response of type ```application/json``` representing the customer found with status 200\
 
-**Endpoint:** /chinook/customer/tracks
-**Requires Authentication:** NO
-**Parameter List**
-    &emsp;Required - customerId - Integer
-**Return Value** HTTP Response of type ```application/json``` representing a list of Tracks bought by the customer, 
-which can be empty if not found or if customer did not buy any tracks. 
+**Endpoint:** /chinook/customer/tracks\
+**Requires Authentication:** NO\
+**Parameter List**\
+    &emsp;Required - customerId - Integer\
+**Return Value** HTTP Response of type ```application/json``` representing a list of Tracks bought by the customer,\ 
+which can be empty if not found or if customer did not buy any tracks.\
 
-**Endpoint:** /chinook/discontinuedtrack
-**Requires Authentication:** NO
-**Parameter List**
-    &emsp;Required - id - Integer
-**Return Value** HTTP Response of type ```application/json``` representing discontinuedTrack with status ```200``` 
-or ```application/text``` containing null with status ```404``` if not found
+**Endpoint:** /chinook/discontinuedtrack\
+**Requires Authentication:** NO\
+**Parameter List**\
+    &emsp;Required - id - Integer\
+**Return Value** HTTP Response of type ```application/json``` representing discontinuedTrack with status ```200```\
+or ```application/text``` containing null with status ```404``` if not found\
 
 **Endpoint:** /chinook/discontinuedtracks
 **Requires Authentication:** NO
-**Return Value** HTTP Response of type ```application/json``` representing the list of all current discontinuedTrack 
-
+**Return Value** HTTP Response of type ```application/json``` representing the list of all current discontinuedTrack
 
 **Endpoint:** /chinook/playlist
 **Requires Authentication:** NO
@@ -122,10 +121,10 @@ or ```application/text``` containing null with status ```404``` if not found
 &emsp;Required - country - String\
 &emsp;Required - numRecords - Integer\
 &emsp;Required - sortType - String\
-**Return Value** HTTP Response of type ```application/text``` or ```application/json``` containing one of:
-- "You are not authorized for this page with your current access level" and a status of ```401```
-- Empty response and a status ```400``` if the sortType was not one of "ASC" or "DESC"
-- A list of JSON objects representing the popularity ranking and a status ```200```
+**Return Value** HTTP Response of type ```application/text``` or ```application/json``` containing one of:\
+- "You are not authorized for this page with your current access level" and a status of ```401```\
+- Empty response and a status ```400``` if the sortType was not one of "ASC" or "DESC"\
+- A list of JSON objects representing the popularity ranking and a status ```200```\
 
 **Endpoint:** chinook/popularitybycountry/artists\
 **Requires Authentication:** YES\
@@ -191,7 +190,7 @@ or ```application/text``` containing null with status ```404``` if not found
 **Endpoint:** /chinook/track\
 **Requires Authentication:** NO\
 **Parameter List**\
-&emsp;Required - id - Integer
+&emsp;Required - id - Integer\
 **Return Value** HTTP Response of type ```application/json``` representing the Track found with status ```200```
 
 ### POST
@@ -303,7 +302,6 @@ or ```application/text``` containing null with status ```404``` if not found
 **Parameter List**\
 &emsp;Required - JSON Body representative of a Playlist\
 **Return Value** HTTP Response of type ```application/json``` containing the updated Playlist as JSON and a status ```200``` or ```application/text``` and the string "null" with status ```200```
-
 
 ### DELETE
 
