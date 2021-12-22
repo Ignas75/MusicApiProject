@@ -1,8 +1,11 @@
-package com.spartaglobal.musicapiproject.pojo.track;
+package com.spartaglobal.musicapiproject.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TrackPOJO{
+
+	public TrackPOJO() {
+	}
 
 	@JsonProperty("genreId")
 	private GenreId genreId;
