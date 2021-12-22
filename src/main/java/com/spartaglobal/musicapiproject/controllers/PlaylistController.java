@@ -43,7 +43,7 @@ public class PlaylistController {
     @Autowired
     private InvoiceService is;
 
-    
+
     @GetMapping(value = "/chinook/playlist")
     public Playlist getTrack(@RequestParam Integer id) {
         Optional<Playlist> result = playlistRepo.findById(id);
@@ -96,7 +96,7 @@ public class PlaylistController {
             headers.add("content-type", "application/json");
         }
         headers.add("content-type", "application/xml");
-        if (!as.isAuthorizedForAction(token, "chinook/playlist/buy")) {
+        if (!as.isAuthorizedForAction(token, "/chinook/playlist/buy")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Token user = tokenRepository.getByAuthToken(token);

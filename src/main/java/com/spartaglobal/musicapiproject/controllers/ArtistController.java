@@ -16,10 +16,6 @@ public class ArtistController {
     @Autowired
     private ArtistRepository artistRepository;
     @Autowired
-    private AlbumRepository albumRepository;
-    @Autowired
-    private AlbumController albumController;
-    @Autowired
     private AuthorizationService as;
 
 
@@ -32,33 +28,32 @@ public class ArtistController {
     @PostMapping("/chinook/artist/create")
     public ResponseEntity createArtist(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Artist newArtist) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/artist/create")) {
+        if (!as.isAuthorizedForAction(token, "/chinook/artist/create")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         artistRepository.save(newArtist);
-        return new ResponseEntity<>("Artist Created", HttpStatus.OK);
+        return new ResponseEntity<>(newArtist, HttpStatus.OK);
     }
-
 
     @PutMapping(value = "/chinook/artist/update")
     public ResponseEntity updateTrack(@RequestBody Artist newState, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/artist/create")){
+        if(!as.isAuthorizedForAction(token,"/chinook/artist/update")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Artist> oldState = artistRepository.findById(newState.getId());
         if(oldState.isEmpty()) return null;
         artistRepository.save(newState);
-        return new ResponseEntity("Track updated", HttpStatus.OK);
+        return new ResponseEntity(newState, HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/chinook/artist/delete")
     public ResponseEntity deleteArtist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/artist/create")){
+        if(!as.isAuthorizedForAction(token,"/chinook/artist/delete")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         artistRepository.delete(artistRepository.getById(id));
-        return new ResponseEntity("Track deleted", HttpStatus.OK);
+        return new ResponseEntity(artistRepository.getById(id), HttpStatus.OK);
     }
 }
