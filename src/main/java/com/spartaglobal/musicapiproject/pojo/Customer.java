@@ -9,7 +9,7 @@ public class Customer{
 	private String firstName;
 	private String phone;
 	private String company;
-	private String supportRepId;
+	private Integer supportRepId;
 	private Integer id;
 	private String state;
 	private String fax;
@@ -79,11 +79,11 @@ public class Customer{
 		return company;
 	}
 
-	public void setSupportRepId(String supportRepId){
+	public void setSupportRepId(Integer supportRepId){
 		this.supportRepId = supportRepId;
 	}
 
-	public String getSupportRepId(){
+	public Integer getSupportRepId(){
 		return supportRepId;
 	}
 

@@ -1,73 +1,81 @@
 package com.spartaglobal.musicapiproject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.spartaglobal.musicapiproject.pojo.Customer;
 import com.spartaglobal.musicapiproject.pojo.CustomerAdd;
-import org.assertj.core.api.AssertDelegateTarget;
+import com.spartaglobal.musicapiproject.util.CustomerUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
 public class CustomerControllerTest {
 
     private static CustomerAdd customerAdd;
-
-    public static HttpResponse getCustomer(){
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/chinook/customer/"))
-                .header("Authorization", "Basic XJALyZSsaJnWWvGTqQQQ")
-                .build();
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = null;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return response;
-    }
-
-    //convert Json
-    public static CustomerAdd jsonConverter(){
-        HttpResponse<String> response = getCustomer();
-        if (response!=null){
-            String json = response.body();
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                CustomerAdd customerAdd = mapper.readValue(json, CustomerAdd.class);
-                return customerAdd;
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
+    private static Customer customer;
+    static CustomerUtil customerUtil = new CustomerUtil();
 
     @BeforeAll
     public static void getJson(){
-        customerAdd = jsonConverter();
+        customerAdd = customerUtil.jsonConverter();
+        if (customerAdd.getCustomer() != null){
+            customer = customerAdd.getCustomer();
+        }
     }
 
-
+    @DisplayName("1.1 Given the customer authentication token, the return should be have the customer ID of 1")
     @Test
     public void getCustomerByTheirAuthToken(){
         Assertions.assertEquals(1,customerAdd.getCustomer().getId());
     }
 
-
-
-
+    @DisplayName("1.2 Given the customer authentication token, Return first name and last name")
     @Test
-    public void createCustomerTest(){
-
+    public void getCustomerNameTest(){
+        Assertions.assertEquals("Luís", customer.getFirstName());
+        Assertions.assertEquals("Gonçalves", customer.getLastName());
     }
+
+    @DisplayName("1.3 Given the customer authentication token, Return company name")
+    @Test
+    public void getCustomerCompanyNameTest(){
+        Assertions.assertEquals("Embraer - Empresa Brasileira de Aeronáutica S.A.", customer.getCompany());
+    }
+
+    @DisplayName("1.4 Given the customer Auth Token, Return customer email address")
+    @Test
+    public void getCustomerEmailAddressTest(){
+        Assertions.assertEquals("luisg@embraer.com.br", customer.getEmail());
+    }
+
+    @DisplayName("1.5 Given the Customer auth Token, Return should be customer address")
+    @Test
+    public void getCustomerAddressTest(){
+        Assertions.assertTrue(customer.getAddress().equals("Av. Brigadeiro Faria Lima, 2170"));
+        Assertions.assertTrue(customer.getCity().equals("São José dos Campos"));
+        Assertions.assertTrue(customer.getState().equals("SP"));
+        Assertions.assertTrue(customer.getCountry().equals("Brazil"));
+        Assertions.assertTrue(customer.getPostalCode().equals("12227-000"));
+    }
+
+    @DisplayName("1.6 Given the Customer auth Token, Return phone number and fax number")
+    @Test
+    public void getCustomerPhoneAndFaxTest(){
+        Assertions.assertTrue(customer.getPhone().equals("+55 (12) 3923-5555"));
+        Assertions.assertTrue(customer.getFax().equals("+55 (12) 3923-5566"));
+    }
+
+    @DisplayName("1.7 Given the Customer Auth Token, Return support rep id")
+    @Test
+    public void getCustomerSupportRepIdTest(){
+        Assertions.assertTrue(customer.getSupportRepId().equals(3));
+    }
+
+    @DisplayName("1.8 Given the customer Auth Token, Return message")
+    @Test
+    public void getCustomerMessageTest(){
+        Assertions.assertTrue(customerAdd.getMessage().equals("Your Account Details"));
+    }
+
 
 
 

@@ -37,8 +37,11 @@ public class CustomerController {
 
     @PostMapping("chinook/customer/create")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
         customerRepository.save(newCustomer);
-        return new ResponseEntity(newCustomer, HttpStatus.OK);
+        String message = "{\"message\":\"Account Created\",\"customer\":" + newCustomer.getCustomer()+"}";
+        return new ResponseEntity(message,headers,HttpStatus.OK);
     }
 
     @GetMapping("chinook/customer")
@@ -48,7 +51,7 @@ public class CustomerController {
         if (as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer")){
             Token token = tokenRepository.getByAuthToken(authToken.split(" ")[1]);
             Customer customer = customerRepository.getCustomerByEmail(token.getEmail());
-            String returnMessage = "{\"message\":\"Account Created\",\"customer\":"+customer.getCustomer()+"}";
+            String returnMessage = "{\"message\":\"Your Account Details\",\"customer\":" + customer.getCustomer() + "}";
         return new ResponseEntity<String>(returnMessage,headers,HttpStatus.OK);
         }
         return new ResponseEntity<>("{\"message\":\"Not Authorized\"}",headers,HttpStatus.OK);
