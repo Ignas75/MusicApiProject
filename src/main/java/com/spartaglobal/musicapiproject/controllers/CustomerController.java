@@ -17,36 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/*
-This class contained the following method,
-I have no idea what is it for, but I will keep the code just in case
-
-    @GetMapping(value="chinook/sales/customer")
-    public Customer getCustomerByEmailAddress(@RequestParam Integer customerID, @RequestHeader("Authorization") String authToken){
-        String token[] = authToken.split(" ");
-        if (aS.isAuthorizedForAction(token[1],"chinook/sales/customer")) {
-
-        }
-        return null;
-    }
-
-*/
-
-
-/*
-That's the point in the method below?
-Is there something I am forgetting or is this method just calling itself?
-
-        public Customer getCustomerByEmail(String emailAddress){
-        if (customerRepository.existsByEmail(emailAddress)){
-            Customer customer = customerRepository.getCustomerByEmail(emailAddress);
-            return customer;
-         }
-        return null;
-    }
-
-*/
-
 @RestController
 public class CustomerController {
 
@@ -79,6 +49,7 @@ public class CustomerController {
         return new ResponseEntity(customer, HttpStatus.OK);
     }
 
+
     @PutMapping("/chinook/customer/update")
     public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
@@ -91,10 +62,12 @@ public class CustomerController {
         return new ResponseEntity("Customer updated", HttpStatus.OK);
     }
 
+
     @DeleteMapping("/chinook/customer/delete")
     public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+
             return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         customerRepository.delete(customerRepository.getById(id));
@@ -112,6 +85,7 @@ public class CustomerController {
         }
         return customerTracks;
     }
+
 
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
         Album album = albumRepository.getById(albumId);
