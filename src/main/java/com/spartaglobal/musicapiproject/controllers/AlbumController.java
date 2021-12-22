@@ -8,6 +8,7 @@ import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
 import com.spartaglobal.musicapiproject.repositories.TrackRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,6 +33,8 @@ public class AlbumController {
     private AuthorizationService as;
     @Autowired
     private CustomerController cc;
+    @Autowired
+    private InvoiceService is;
 
     @RequestMapping(value = "/chinook/album/{id}",
             method = RequestMethod.GET,
@@ -107,8 +110,7 @@ public class AlbumController {
         List<Track> t = trackRepository.findByAlbumId(albumRepository.getById(id));
         Customer c = customerRepository.findAll().stream().filter(s -> Objects.equals(s.getEmail(), customerEmail)).toList().get(0);
         t.remove(cc.getUserPurchasedTracksFromAlbum(c.getId(),id));
-        InvoiceController newInvoice = new InvoiceController();
-        if (newInvoice.createInvoice(t, c)) {
+        if (is.createInvoice(t, c)) {
             return new ResponseEntity<>("Invoice(s) created", HttpStatus.OK);
         }
         return new ResponseEntity<>("Customer owns all the tracks in album", HttpStatus.OK);

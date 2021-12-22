@@ -3,6 +3,7 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,7 @@ public class PlaylistController {
     private CustomerController cc = new CustomerController();
 
     @Autowired
-    private InvoiceController inv = new InvoiceController();
+    private InvoiceService is;
 
 
 
@@ -116,7 +117,7 @@ public class PlaylistController {
             allTracks.add(trackRepository.getById(t.getId().getTrackId()));
         }
         allTracks.remove(cc.getCustomerTracks(customer.getId()));
-        if(inv.createInvoice(allTracks, customer)){
+        if(is.createInvoice(allTracks, customer)){
             return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
         }
         return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);

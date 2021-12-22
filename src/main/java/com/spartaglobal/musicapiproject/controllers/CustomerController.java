@@ -8,6 +8,7 @@ import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
 import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.InvoiceRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class CustomerController {
     @Autowired
     private AuthorizationService as;
     @Autowired
-    private InvoiceController ic;
+    private InvoiceService is;
 
 
     @PostMapping("/chinook/customer/create")
@@ -81,7 +82,7 @@ public class CustomerController {
                 .filter(s -> s.getCustomerId().equals(customer)).toList();
         List<Track> customerTracks = new ArrayList<>();
         for (int i = 0; i < customerInvoices.size(); i++) {
-            customerTracks.addAll(ic.getTracksFromInvoice(customerInvoices.get(i)));
+            customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
         }
         return customerTracks;
     }

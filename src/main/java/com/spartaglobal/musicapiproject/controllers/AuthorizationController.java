@@ -94,5 +94,4 @@ public class AuthorizationController {
             return new ResponseEntity<>("{\"message\": \"email address not registered\"}", headers, HttpStatus.NOT_FOUND);
         }
     }
-    
 }

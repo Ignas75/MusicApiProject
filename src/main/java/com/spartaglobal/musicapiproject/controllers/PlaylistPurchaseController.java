@@ -44,7 +44,7 @@ public class PlaylistPurchaseController {
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
 //    @PostMapping(value = "/chinook/purchase-playlist")
     public ResponseEntity<String> getPlaylist(@PathVariable Integer playListId, @RequestHeader("Authorization") String authToken){
-       if (as.isAuthorizedForAction(authToken.split(" ")[1],"/chinook/purchase-playlist")){
+       if (!as.isAuthorizedForAction(authToken.split(" ")[1],"/chinook/purchase-playlist")){
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
 
