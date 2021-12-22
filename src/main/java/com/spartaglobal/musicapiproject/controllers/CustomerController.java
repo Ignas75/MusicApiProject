@@ -1,47 +1,43 @@
 package com.spartaglobal.musicapiproject.controllers;
 
+import com.spartaglobal.musicapiproject.entities.Album;
 import com.spartaglobal.musicapiproject.entities.Customer;
-import com.spartaglobal.musicapiproject.entities.Token;
+import com.spartaglobal.musicapiproject.entities.Invoice;
+import com.spartaglobal.musicapiproject.entities.Track;
+import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
 import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
-import com.spartaglobal.musicapiproject.repositories.TokenRepository;
+import com.spartaglobal.musicapiproject.repositories.InvoiceRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+/*
+This class contained the following method,
+I have no idea what is it for, but I will keep the code just in case
 
-/***
- * Please add following lines of sql query into the database after running the endpointpermissions query from AuthorizationService class
- *
-  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/sales/customer", 0,1,1);
-  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/customer", 1,0,0);
-  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/sales/update", 0,1,1);
-  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("chinook/sales/delete/customer", 0,0,1);
-  INSERT INTO endpointpermissions (url, IsForCustomer, IsForStaff, IsForAdmins) VALUES ("", 0,0,0);
- *
- */
+    @GetMapping(value="chinook/sales/customer")
+    public Customer getCustomerByEmailAddress(@RequestParam Integer customerID, @RequestHeader("Authorization") String authToken){
+        String token[] = authToken.split(" ");
+        if (aS.isAuthorizedForAction(token[1],"chinook/sales/customer")) {
+
+        }
+        return null;
+    }
+
+*/
 
 
+/*
+That's the point in the method below?
+Is there something I am forgetting or is this method just calling itself?
 
-
-
-
-@RestController
-public class CustomerController {
-    @Autowired
-    private CustomerRepository customerRepository;
-    @Autowired
-    private TokenRepository tokenRepository;
-
-    @Autowired
-    private AuthorizationService aS = new AuthorizationService();
-
-    public Customer getCustomerByEmail(String emailAddress){
+        public Customer getCustomerByEmail(String emailAddress){
         if (customerRepository.existsByEmail(emailAddress)){
             Customer customer = customerRepository.getCustomerByEmail(emailAddress);
             return customer;
@@ -49,123 +45,78 @@ public class CustomerController {
         return null;
     }
 
-    //GET any customer details if they are admin or sales,
-    @GetMapping(value = "chinook/sales/customer")
-    public ResponseEntity<?> getCustomerByEmailAddress(@RequestParam String emailAddress, @RequestHeader("Authorization") String authToken) {
-        String token[] = authToken.split(" ");
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("content-type", "application/json");
-        if (aS.isAuthorizedForAction(token[1], "chinook/sales/customer")) {
-            Token token2 = tokenRepository.getByAuthToken(token[1]);
-            if (!token2.getRoleID().equals(3)) {
-                return ResponseEntity.ok(customerRepository.getCustomerByEmail(emailAddress));
-            }
+*/
+
+@RestController
+public class CustomerController {
+
+    @Autowired
+    AlbumRepository albumRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+    @Autowired
+    private AuthorizationService as;
+    @Autowired
+    private InvoiceController ic;
+
+
+    @PostMapping("/chinook/customer/create")
+    public ResponseEntity<Customer> createCustomer(@RequestHeader("Authorization") String authTokenHeader,
+                                                   @RequestBody Customer newCustomer) {
+        String token = authTokenHeader.split(" ")[1];
+        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<String>("{\"message\":\"You're not authorized!\"}", headers, HttpStatus.OK);
+        customerRepository.save(newCustomer);
+        return new ResponseEntity("Customer Created", HttpStatus.OK);
     }
 
-
-    //get the customer detail based on the auth token
-    @GetMapping(value = "chinook/customer")
-    public ResponseEntity<?> requestCustomerDetails(@RequestHeader("Authorization") String authToken){
-        String token[] = authToken.split(" ");
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("content-type", "application/json");
-        if (aS.isAuthorizedForAction(token[1], "chinook/customer")){
-            Token userToken = tokenRepository.getByAuthToken(token[1]);
-            Customer customer = customerRepository.getCustomerByEmail(userToken.getEmail());
-            if (customer != null)
-                return ResponseEntity.ok(customer);
-        }
-        return new ResponseEntity<>("{\"message\":\"Invalid Request\"}",headers, HttpStatus.BAD_REQUEST);
+    @GetMapping("/chinook/customer")
+    public ResponseEntity<Customer> readCustomer(@RequestParam Integer id) {
+        Customer customer = customerRepository.getById(id);
+        return new ResponseEntity(customer, HttpStatus.OK);
     }
 
-    //**TODO Check this if we need this or not */
-    @DeleteMapping(value = "chinook/sales/delete/customer")
-    public ResponseEntity<?> deleteCustomerByCustomerID(@RequestParam Integer customerID, @RequestHeader("Authorization") String authToken){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("content-type", "application/json");
-        String token[] = authToken.split(" ");
-        if (aS.isAuthorizedForAction(token[1], "chinook/sales/delete/customer")) {
-            if (customerRepository.existsById(customerID)){
-                Customer customer = customerRepository.getById(customerID);
-                customerRepository.delete(customer);
-            }
+    @PutMapping("/chinook/customer/update")
+    public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
+        String token = authTokenHeader.split(" ")[1];
+        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>("{\"message\":\"Invalid Request\"}", headers, HttpStatus.BAD_REQUEST);
+        Optional<Customer> oldState = customerRepository.findById(newState.getId());
+        if (oldState.isEmpty()) return null;
+        customerRepository.save(newState);
+        return new ResponseEntity("Customer updated", HttpStatus.OK);
     }
 
-
-
-    @PatchMapping(value="chinook/sales/update")
-    public ResponseEntity<?> updateCustomerByEmailAddress( @RequestParam Customer customer1, @RequestHeader("Authorization") String authToken){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("content-type","application/json");
-        String token[] = authToken.split(" ");
-        if(aS.isAuthorizedForAction(token[1],"chinook/sales/update")){
-            Token userToken = tokenRepository.getByAuthToken(token[1]);
-            Customer customer = customerRepository.getCustomerByEmail(userToken.getEmail());
-            if(customer != null)
-                return ResponseEntity.ok(customer);
+    @DeleteMapping("/chinook/customer/delete")
+    public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
+        String token = authTokenHeader.split(" ")[1];
+        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
-        Optional<Customer> customer = customerRepository.findById(customer1.getId());
-        if(customer.isEmpty()) {
-            return new ResponseEntity<String>("{\"message\":\"Customer doesn't exist" + customer1.getId() + "\"}", headers, HttpStatus.OK);
-        }
-        customer.get().setFirstName(customer1.getFirstName());
-        customer.get().setLastName(customer1.getLastName());
-        customer.get().setCompany(customer1.getCompany());
-        customer.get().setAddress(customer1.getAddress());
-        customer.get().setCity(customer1.getCity());
-        customer.get().setState(customer1.getState());
-        customer.get().setCountry(customer1.getCountry());
-        customer.get().setPostalCode(customer1.getPostalCode());
-        customer.get().setPhone(customer1.getPhone());
-        customer.get().setFax(customer1.getFax());
-        customer.get().setEmail(customer1.getEmail());
-
-        String message = "{\"messsage\" : \"Customer Update\", \"customer\":";
-        String vals = " {\"id\":\"" + customer1.getId() + "\",\"firstName\":\"" + customer1.getFirstName() +
-                         "\",\"lastName\":\"" + customer1.getLastName() +"\",\"company\":\"" + customer1.getCompany() +
-                "\",\"Address\":\"" + customer1.getAddress() +"\",\"city\":\"" + customer1.getCity() +
-                "\",\"State\":\"" + customer1.getState() + "\",\"country\":\"" + customer1.getCountry()+
-                "\",\"postal code\":\"" + customer1.getPostalCode() + "\",\"phone\":\"" + customer1.getPhone()+
-                "\",\"fax\":\"" + customer1.getFax() + "\",\"email\":\"" + customer1.getEmail() + "\"}";
-        String bodymessage = message + vals + "}";
-        return new ResponseEntity<String>(bodymessage, headers, HttpStatus.OK);
+        customerRepository.delete(customerRepository.getById(id));
+        return new ResponseEntity("Customer deleted", HttpStatus.OK);
     }
 
-    @PutMapping(value="/chinook/sales/new-customer")
-    public ResponseEntity<Customer> newCustomerHere(@RequestParam Customer customer1, @RequestHeader("Authorization") String authToken){
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("content-type","application/json");
-        String token[] = authToken.split(" ");
-        if(aS.isAuthorizedForAction(token[1],"chinook/sales/new-customer")){
-            Token userToken = tokenRepository.getByAuthToken(token[1]);
-            Customer customer = customerRepository.getCustomerByEmail(userToken.getEmail());
-            if(customer != null)
-                return ResponseEntity.ok(customer);
+    @GetMapping("/chinook/customer/tracks")
+    public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
+        Customer customer = customerRepository.getById(customerId);
+        List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
+                .filter(s -> s.getCustomerId().equals(customer)).toList();
+        List<Track> customerTracks = new ArrayList<>();
+        for (int i = 0; i < customerInvoices.size(); i++) {
+            customerTracks.addAll(ic.getTracksFromInvoice(customerInvoices.get(i)));
         }
-        Optional<Customer> customer = customerRepository.findById(customer1.getId());
-        if(customer.isPresent()){
-            customer.get().setId(customer1.getId());
-            customer.get().setFirstName(customer1.getFirstName());
-            customer.get().setLastName(customer1.getLastName());
-            customer.get().setCompany(customer1.getCompany());
-            customer.get().setAddress(customer1.getAddress());
-            customer.get().setCity(customer1.getCity());
-            customer.get().setState(customer1.getState());
-            customer.get().setCountry(customer1.getCountry());
-            customer.get().setPostalCode(customer1.getPostalCode());
-            customer.get().setPhone(customer1.getPhone());
-            customer.get().setFax(customer1.getFax());
-            customer.get().setEmail(customer1.getEmail());
-            final Customer updatesCustomer = customerRepository.save(customer1);
-            return ResponseEntity.ok(updatesCustomer);
-        } else
-            
-            return null;
+        return customerTracks;
+    }
 
+    public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
+        Album album = albumRepository.getById(albumId);
+        List<Track> customerTracks = getCustomerTracks(customerId);
+        return customerTracks.stream().filter(s -> s.getAlbumId().equals(album)).toList();
     }
 }
 
