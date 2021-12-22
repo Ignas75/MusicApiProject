@@ -94,27 +94,5 @@ public class AuthorizationController {
             return new ResponseEntity<>("{\"message\": \"email address not registered\"}", headers, HttpStatus.NOT_FOUND);
         }
     }
-
-    // THESE ARE PROOF OF CONCEPT URLS FOR THE AUTH SYSTEM
-    @GetMapping("/chinook/customer-page")
-    public ResponseEntity<String> testFunction(@RequestHeader("Authorization") String authToken){
-        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer-page")) {
-            return new ResponseEntity<>("Authorized", HttpStatus.OK);
-        } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-    }
-
-    @GetMapping("/chinook/employee-page")
-    public ResponseEntity<String> testFunction2(@RequestHeader("Authorization") String authToken){
-        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/employee-page")) {
-            return new ResponseEntity<>("Authorized", HttpStatus.OK);
-        } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-    }
-
-    @GetMapping("/chinook/admin-page")
-    public ResponseEntity<?> testFunction3(@RequestHeader("Authorization") String authToken){
-        if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/admin-page")) {
-            return new ResponseEntity<>(popularityService.findMostPopularItems("Album", 10), HttpStatus.OK);
-        } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-    }
-
+    
 }
