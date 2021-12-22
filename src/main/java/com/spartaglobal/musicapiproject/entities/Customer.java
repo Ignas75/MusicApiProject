@@ -154,10 +154,10 @@ public class Customer {
         this.id = id;
     }
 
-    @Override
-    public String toString() {
+
+    public String getCustomer() {
         String data =
-                "{\"id\":\""   + id +
+                "{\"id\":\""     + id +
                 "\",\"firstName\":\""
                 +firstName +
                 "\",\"lastName\":\""

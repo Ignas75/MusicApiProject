@@ -42,11 +42,16 @@ public class CustomerController {
     }
 
     @GetMapping("chinook/customer")
-    public ResponseEntity<String> readCustomer(@RequestParam Integer id) {
+    public ResponseEntity<String> readCustomer(@RequestHeader("Authorization") String authToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-        Customer customer = customerRepository.getById(id);
-        return new ResponseEntity<>(customer.toString(), headers,HttpStatus.OK);
+        if (as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer")){
+            Token token = tokenRepository.getByAuthToken(authToken.split(" ")[1]);
+            Customer customer = customerRepository.getCustomerByEmail(token.getEmail());
+            String returnMessage = "{\"message\":\"Account Created\",\"customer\":"+customer.getCustomer()+"}";
+        return new ResponseEntity<String>(returnMessage,headers,HttpStatus.OK);
+        }
+        return new ResponseEntity<>("{\"message\":\"Not Authorized\"}",headers,HttpStatus.OK);
     }
 
 
