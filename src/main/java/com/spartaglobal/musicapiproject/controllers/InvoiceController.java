@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -46,19 +47,22 @@ public class InvoiceController {
         }
         newInvoice.setTotal(total);
         invoiceRepository.save(newInvoice);
+        List<Invoiceline> allInvoiceLineTracks = new ArrayList<>();
         for (int i = 0; i < tracks.size(); i++) {
             createInvoiceLine(newInvoice, tracks.get(i));
+            allInvoiceLineTracks.add(createInvoiceLine(newInvoice, tracks.get(i)));
          }
+        invoiceLineRepository.saveAllAndFlush(allInvoiceLineTracks);
         return true;
     }
 
-    private void createInvoiceLine(Invoice invoice, Track track){
+    private Invoiceline createInvoiceLine(Invoice invoice, Track track){
         Invoiceline invoiceLine = new Invoiceline();
         invoiceLine.setInvoiceId(invoice);
         invoiceLine.setQuantity(1);
         invoiceLine.setTrackId(track);
         invoiceLine.setUnitPrice(track.getUnitPrice());
-        invoiceLineRepository.save(invoiceLine);
+        return invoiceLine;
     }
 
     public List<Track> getTracksFromInvoice(Invoice invoice){

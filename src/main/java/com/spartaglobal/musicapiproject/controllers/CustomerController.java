@@ -49,6 +49,7 @@ public class CustomerController {
         return new ResponseEntity(customer, HttpStatus.OK);
     }
 
+
     @PutMapping("/chinook/customer/update")
     public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
@@ -65,7 +66,8 @@ public class CustomerController {
     @DeleteMapping("/chinook/customer/delete")
     public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+
             return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         customerRepository.delete(customerRepository.getById(id));
@@ -83,6 +85,7 @@ public class CustomerController {
         }
         return customerTracks;
     }
+
 
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
         Album album = albumRepository.getById(albumId);

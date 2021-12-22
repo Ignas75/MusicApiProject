@@ -6,6 +6,7 @@ import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,7 +89,7 @@ public class PlaylistController {
         }
     }
 
-    @PostMapping(value = "/chinook/playlist/buy")
+    @PostMapping(value = "chinook/playlist/buy", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken) {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
