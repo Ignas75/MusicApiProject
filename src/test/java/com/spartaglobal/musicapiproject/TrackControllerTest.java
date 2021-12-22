@@ -1,154 +1,64 @@
 package com.spartaglobal.musicapiproject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spartaglobal.musicapiproject.pojo.TrackPOJO;
+import com.spartaglobal.musicapiproject.requests.RequestBuilder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.file.Path;
 
 public class TrackControllerTest {
-    //TODO - track/buy, track/update, track/delete <- delete isn't finished yet :(
+    //TODO - track/delete <- delete isn't finished yet :(
+    private static TrackPOJO track;
+    private static TrackPOJO postTrack;
+    private static TrackPOJO putTrack;
+    private static String buyTrack;
+
+    @BeforeAll
+    public static void trackRequests() throws IOException, InterruptedException, URISyntaxException{
+        track = RequestBuilder.getTrackRequest(1);
+        postTrack= RequestBuilder.postTrackRequest("ihKc6Ot7BE9MtptdVG5e");
+        putTrack = RequestBuilder.putTrackRequest("ihKc6Ot7BE9MtptdVG5e");
+        buyTrack = RequestBuilder.buyTrackRequest(1, "JJVXUgNu6zoGeeyZsYa1");
+    }
 
     // Customer, Staff, Admin, Invalid Id, Valid Id, Invalid token, Valid token
     @Test
     @DisplayName("Customer successfully buys track")
-    public void buyTrack() throws IOException, InterruptedException, URISyntaxException{
-        HttpRequest req = HttpRequest
-                .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
-                .GET()
-                .header("content-type", "application/json")
-                .header("Authorization", "Basic JJVXUgNu6zoGeeyZsYa1")
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> resp = client.send(req,
-                HttpResponse.BodyHandlers.ofString());
-        String json = resp.body();
-        Assertions.assertEquals("Invoice(s) created", json);
-    }
-
-    @Test
-    @DisplayName("Invalid token when buying track")
-    public void buyTrackInvalidToken() throws IOException, InterruptedException, URISyntaxException{
-        HttpRequest req = HttpRequest
-                .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
-                .GET()
-                .header("content-type", "application/json")
-                .header("Authorization", "Basic invalidtoken")
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> resp = client.send(req,
-                HttpResponse.BodyHandlers.ofString());
-        String json = resp.body();
-        Assertions.assertEquals("Token Not Valid", json);
-    }
-
-    @Test
-    @DisplayName("Invalid token when buying track")
-    public void buyTrackAuthorized() throws IOException, InterruptedException, URISyntaxException{
-        HttpRequest req = HttpRequest
-                .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
-                .GET()
-                .header("content-type", "application/json")
-                .header("Authorization", "Basic invalidtoken")
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> resp = client.send(req,
-                HttpResponse.BodyHandlers.ofString());
-        String json = resp.body();
-        Assertions.assertEquals("Token Not Valid", json);
-    }
-
-    @ParameterizedTest
-    @DisplayName("Invalid token when buying track")
-    @ValueSource(strings = {"1YrKpXYZUZLlCTakT9MT"}) // admin and staff tokens
-    public void buyTrackUnauthorized() throws IOException, InterruptedException, URISyntaxException{
-        HttpRequest req = HttpRequest
-                .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
-                .GET()
-                .header("content-type", "application/json")
-                .header("Authorization", "Basic invalidtoken")
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> resp = client.send(req,
-                HttpResponse.BodyHandlers.ofString());
-        String json = resp.body();
-        Assertions.assertEquals("Token Not Valid", json);
+    public void buyTrack() {
+        Assertions.assertEquals("Invoice(s) created", buyTrack);
     }
 
     @Test
     @DisplayName("GET request for track_id = 1")
-    public void getTrack(){
-        ObjectMapper mapper = new ObjectMapper();
-        TrackPOJO track;
-        try {
-            track = mapper.readValue(new URL("http://localhost:8080/chinook/track/read?id=1"), TrackPOJO.class);
-            Assertions.assertEquals(1, track.getId());
-            Assertions.assertEquals("For Those About To Rock (We Salute You)", track.getName());
-            Assertions.assertEquals("For Those About To Rock We Salute You", track.getAlbumId().getTitle());
-            Assertions.assertEquals("Rock", track.getGenreId().getName());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void getTrack() {
+        Assertions.assertEquals(1, track.getId());
     }
 
     @Test
     @DisplayName("POST creating a new track")
-    public void addNewTrackHttpClientVersion() throws IOException, InterruptedException, URISyntaxException {
-        HttpRequest req = HttpRequest
-                .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/track/create"))
-                .POST(HttpRequest.BodyPublishers.ofFile(Path.of("src/test/java/com/spartaglobal/musicapiproject/json/track.json")))
-                .header("content-type", "application/json")
-                .header("Authorization", "Basic OZHBA3FRVrTGXzfwdTsi")
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> resp = client.send(req,
-                HttpResponse.BodyHandlers.ofString());
-        String json = resp.body();
-        ObjectMapper mapper = new ObjectMapper();
-        TrackPOJO track = mapper.readValue(json, TrackPOJO.class);
-        System.out.println("Inserted New track with id = " + track.getId());
-        Assertions.assertEquals("See Right Through You Mate", track.getName());
-        Assertions.assertEquals("Jagged Little Pill", track.getAlbumId().getTitle());
-        Assertions.assertEquals("Alanis Morissette & Glenn Ballard", track.getComposer());
+    public void postTrack() {
+        Assertions.assertEquals("See Right Through You Mate", postTrack.getName());
     }
 
     @Test
-    @DisplayName("PUT updating a new track")
-    public void updateTrackHttpClientVersion() throws IOException, InterruptedException, URISyntaxException {
-        HttpRequest req = HttpRequest
-                .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/track/update"))
-                .PUT(HttpRequest.BodyPublishers.ofFile(Path.of("src/test/java/com/spartaglobal/musicapiproject/json/updateTrack.json")))
-                .header("content-type", "application/json")
-                .header("Authorization", "Basic OZHBA3FRVrTGXzfwdTsi")
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> resp = client.send(req,
-                HttpResponse.BodyHandlers.ofString());
-        String json = resp.body();
-        ObjectMapper mapper = new ObjectMapper();
-        TrackPOJO track = mapper.readValue(json, TrackPOJO.class);
-        System.out.println("Updated track with id = " + track.getId());
-        Assertions.assertEquals("MacBeth", track.getName());
-        Assertions.assertEquals("Greatest Kiss", track.getAlbumId().getTitle());
-        Assertions.assertEquals("S. Penridge, Bob Ezrin, Peter Criss", track.getComposer());
+    @DisplayName("PUT track name")
+    public void putTrackName() {
+        Assertions.assertEquals("MacBeth", putTrack.getName());
     }
 
+    @Test
+    @DisplayName("PUT track title")
+    public void putTrackAlbum() {
+        Assertions.assertEquals("Greatest Kiss", putTrack.getAlbumId().getTitle());
+    }
 
+    @Test
+    @DisplayName("PUT track composer")
+    public void putTrackComposer() {
+        Assertions.assertEquals("S. Penridge, Bob Ezrin, Peter Criss", putTrack.getComposer());
+    }
 }

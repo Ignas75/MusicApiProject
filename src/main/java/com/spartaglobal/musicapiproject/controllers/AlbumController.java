@@ -71,7 +71,7 @@ public class AlbumController {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         albumRepository.save(newAlbum);
-        return new ResponseEntity<>("Album Created", HttpStatus.OK);
+        return new ResponseEntity<>(newAlbum, HttpStatus.OK);
     }
 
     @PutMapping(value = "/chinook/album/update")
