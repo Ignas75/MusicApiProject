@@ -6,6 +6,7 @@ import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,8 +39,11 @@ public class PlaylistPurchaseController {
     private AuthorizationService as = new AuthorizationService();
 
     //TODO Include the body to get the authentication token, to get the customer information//
-    @PostMapping(value = "/chinook/purchase-playlist")
-    public ResponseEntity<String> getPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken){
+    @RequestMapping(value = "/chinook/purchase-playlist/{playListId}",
+            method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+//    @PostMapping(value = "/chinook/purchase-playlist")
+    public ResponseEntity<String> getPlaylist(@PathVariable Integer playListId, @RequestHeader("Authorization") String authToken){
        if (as.isAuthorizedForAction(authToken.split(" ")[1],"/chinook/purchase-playlist")){
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
