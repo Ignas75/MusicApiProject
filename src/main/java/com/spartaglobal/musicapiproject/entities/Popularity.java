@@ -9,17 +9,17 @@ import javax.persistence.*;
 public class Popularity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "rowID", nullable = false)
+    @Column(name = "RowID", nullable = false)
     private Integer id;
 
-    @Column(name = "contentTitle", nullable = false)
+    @Column(name = "ContentTitle", nullable = false)
     private String contentTitle;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "contentType", nullable = false)
+    @JoinColumn(name = "ContentType", nullable = false)
     private ContentType contentType;
 
-    @Column(name = "numberOfPurchases", nullable = false)
+    @Column(name = "NumberOfPurchases", nullable = false)
     private Integer numberOfPurchases;
 
     public Integer getNumberOfPurchases() {
