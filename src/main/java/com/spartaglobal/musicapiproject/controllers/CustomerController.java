@@ -5,6 +5,7 @@ import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,9 +42,11 @@ public class CustomerController {
     }
 
     @GetMapping("chinook/customer")
-    public ResponseEntity<Customer> readCustomer(@RequestParam Integer id) {
+    public ResponseEntity<String> readCustomer(@RequestParam Integer id) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
         Customer customer = customerRepository.getById(id);
-        return new ResponseEntity(customer, HttpStatus.OK);
+        return new ResponseEntity<>(customer.toString(), headers,HttpStatus.OK);
     }
 
 

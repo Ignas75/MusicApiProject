@@ -1,7 +1,10 @@
 package com.spartaglobal.musicapiproject.entities;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import javax.persistence.*;
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "customer")
 public class Customer {
@@ -149,5 +152,37 @@ public class Customer {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        String data =
+                "{\"id\":\""   + id +
+                "\",\"firstName\":\""
+                +firstName +
+                "\",\"lastName\":\""
+                + lastName+
+                "\",\"company\":\""
+                + company +
+                "\",\"address\":\""
+                + address +
+                "\",\"city\":\""
+                + city +
+                "\",\"state\":\""
+                + state +
+                "\",\"country\":\""
+                + country +
+                "\",\"postalCode\":\""
+                + postalCode +
+                "\",\"phone\":\""
+                + phone +
+                "\",\"fax\":\""
+                + fax +
+                "\",\"email\":\""
+                + email +
+                "\",\"supportRepId\":\""
+                + supportRepId.getId() +
+                "\"}";
+        return data;
     }
 }
