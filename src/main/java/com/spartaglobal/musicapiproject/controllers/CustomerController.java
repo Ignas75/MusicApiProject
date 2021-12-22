@@ -1,12 +1,7 @@
 package com.spartaglobal.musicapiproject.controllers;
 
-import com.spartaglobal.musicapiproject.entities.Album;
-import com.spartaglobal.musicapiproject.entities.Customer;
-import com.spartaglobal.musicapiproject.entities.Invoice;
-import com.spartaglobal.musicapiproject.entities.Track;
-import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
-import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
-import com.spartaglobal.musicapiproject.repositories.InvoiceRepository;
+import com.spartaglobal.musicapiproject.entities.*;
+import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +23,19 @@ public class CustomerController {
     @Autowired
     private InvoiceRepository invoiceRepository;
     @Autowired
+    private InvoicelineRepository invoicelineRepository;
+    @Autowired
+    private ArchiveinvoiceRepository archiveinvoiceRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
+    @Autowired
     private AuthorizationService as;
     @Autowired
     private InvoiceService is;
 
 
     @PostMapping("/chinook/customer/create")
-    public ResponseEntity<Customer> createCustomer(@RequestHeader("Authorization") String authTokenHeader,
-                                                   @RequestBody Customer newCustomer) {
-        String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
         customerRepository.save(newCustomer);
         return new ResponseEntity("Customer Created", HttpStatus.OK);
     }
@@ -93,6 +89,43 @@ public class CustomerController {
         List<Track> customerTracks = getCustomerTracks(customerId);
         return customerTracks.stream().filter(s -> s.getAlbumId().equals(album)).toList();
     }
+
+
+    @DeleteMapping("chinook/customer/delete")
+    public ResponseEntity<Customer> deleteCustomer(@RequestHeader("Authorization") String authTokenHeader) {
+        String token = authTokenHeader.split(" ")[1];
+        if (!as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
+        Token tk = tokenRepository.getByAuthToken(token);
+        Customer customer  = customerRepository.getCustomerByEmail(tk.getEmail());
+
+        //find all the invoices for that customer
+        List<Invoice> invoices = invoiceRepository.findAllByCustomerId(customer);
+
+        for (Invoice i : invoices){
+            archiveinvoiceRepository.save(genArchiveInvoice(i));
+            List<Invoiceline> invoicelines = invoicelineRepository.findAllByInvoiceId(i);
+            invoicelineRepository.deleteAllInBatch(invoicelines);
+        }
+        invoiceRepository.deleteAllInBatch(invoices);
+        customerRepository.delete(customer);
+        return new ResponseEntity("Customer deleted", HttpStatus.OK);
+    }
+
+
+    private Archiveinvoice genArchiveInvoice(Invoice invoice){
+        Archiveinvoice archiveinvoice = new Archiveinvoice();
+        archiveinvoice.setFirstName(invoice.getCustomerId().getFirstName());
+        archiveinvoice.setLastName(invoice.getCustomerId().getLastName());
+        archiveinvoice.setEmailAddress(invoice.getCustomerId().getEmail());
+        archiveinvoice.setAddress(invoice.getBillingAddress() +" "+  invoice.getBillingCity() +" "+  invoice.getBillingState() +" "+ invoice.getBillingCountry());
+        archiveinvoice.setPostalCode(invoice.getBillingPostalCode());
+        archiveinvoice.setInvoiceDate(invoice.getInvoiceDate());
+        archiveinvoice.setTotal(invoice.getTotal());
+        return archiveinvoice;
+    }
+
 }
 
 
