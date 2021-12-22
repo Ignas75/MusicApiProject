@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
 
+/*
+This class is a soon-to-be unnecessary
+as all of those methods will belong to their respective methods
+*/
+
 public class AdminAccess {
 
     @Autowired

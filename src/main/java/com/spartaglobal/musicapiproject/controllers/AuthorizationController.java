@@ -35,7 +35,8 @@ public class AuthorizationController {
     @Autowired
     private CustomerRepository customerRepository;
 
-    @GetMapping("/chinook/create-token")
+
+    @GetMapping("/chinook/token/create")
     public ResponseEntity<String> generateNewAuthToken(@RequestParam String emailAddress){
         StringBuilder sb = new StringBuilder();
         Random rng = new Random();
@@ -82,7 +83,7 @@ public class AuthorizationController {
         return new ResponseEntity<>("{\n\"email\": " + "\"" + emailAddress + "\",\n" + "\"token\": " + "\"" + sb + "\"\n}", headers, HttpStatus.OK);
     }
 
-    @DeleteMapping("/chinook/clear-token")
+    @DeleteMapping("/chinook/token/delete")
     public ResponseEntity<String> clearExistingAuthToken(@RequestParam String emailAddress){
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
@@ -95,21 +96,21 @@ public class AuthorizationController {
     }
 
     // THESE ARE PROOF OF CONCEPT URLS FOR THE AUTH SYSTEM
-    @GetMapping("chinook/customer-page")
+    @GetMapping("/chinook/customer-page")
     public ResponseEntity<String> testFunction(@RequestHeader("Authorization") String authToken){
         if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer-page")) {
             return new ResponseEntity<>("Authorized", HttpStatus.OK);
         } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
     }
 
-    @GetMapping("chinook/employee-page")
+    @GetMapping("/chinook/employee-page")
     public ResponseEntity<String> testFunction2(@RequestHeader("Authorization") String authToken){
         if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/employee-page")) {
             return new ResponseEntity<>("Authorized", HttpStatus.OK);
         } else return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
     }
 
-    @GetMapping("chinook/admin-page")
+    @GetMapping("/chinook/admin-page")
     public ResponseEntity<?> testFunction3(@RequestHeader("Authorization") String authToken){
         if(as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/admin-page")) {
             return new ResponseEntity<>(popularityService.findMostPopularItems("Album", 10), HttpStatus.OK);

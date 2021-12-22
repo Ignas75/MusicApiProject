@@ -13,8 +13,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/*
+Half of the methods belong to other classes, so I moved them.
+For the time being I will leave the class as it is.
+Delete them when you have reviewed the changes.
+
+As the other half deal with discounts I recommend renaming the class to Discount Controller
+
+Methods I moved
+getUserTracks -> CustomerController (renamed to getCustomerTracks)
+getUserPurchasedTracksFromAlbum -> CustomerController (renamed to getCustomerTracksPurchasedFromAlbum)
+getAlbumTracks -> AlbumController
+*/
+
 @RestController
 public class PurchaseController {
+    @Autowired
+    InvoiceController ic;
     @Autowired
     InvoiceRepository invoiceRepository;
     @Autowired
@@ -61,6 +76,7 @@ public class PurchaseController {
     }
 
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId){
+
         List<Track> purchasedTracksFromAlbum = new ArrayList<>();
         Optional<Album> findAlbum = albumRepository.findById(albumId);
         Optional<Customer> findCustomer = customerRepository.findById(customerId);
@@ -112,11 +128,12 @@ public class PurchaseController {
     // need already purchased tracks from the user that belong to the current album
     // what if the same song is on another album?
     // TODO: add discounts
-    @PostMapping(value = "chinook/album/purchase")
+    @PostMapping(value = "/chinook/album/purchase")
     public ResponseEntity<String> purchaseAlbum(@RequestParam Integer albumId, @RequestParam Integer customerId,
                                                 @RequestParam String billingAddress, @RequestParam String billingCity,
                                                 @RequestParam String billingCountry, @RequestParam String postalCode,
                                                 @RequestHeader("Authorization") String authToken){
+
         if(!authorizationService.isAuthorizedForAction(authToken.split(" ")[3], "chinook/album/purchase")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
