@@ -3,6 +3,7 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,13 @@ public class CustomerController {
     @Autowired
     private InvoicelineRepository invoicelineRepository;
     @Autowired
-    private AuthorizationService as;
-    @Autowired
-    private InvoiceController ic;
+    private ArchiveinvoiceRepository archiveinvoiceRepository;
     @Autowired
     private TokenRepository tokenRepository;
     @Autowired
-    private ArchiveinvoiceRepository archiveinvoiceRepository;
-
+    private AuthorizationService as;
+    @Autowired
+    private InvoiceService is;
 
 
     @PostMapping("/chinook/customer/create")
@@ -60,6 +60,17 @@ public class CustomerController {
     }
 
 
+    @DeleteMapping("/chinook/customer/delete")
+    public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
+        String token = authTokenHeader.split(" ")[1];
+        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
+        customerRepository.delete(customerRepository.getById(id));
+        return new ResponseEntity("Customer deleted", HttpStatus.OK);
+    }
+
     @GetMapping("/chinook/customer/tracks")
     public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
         Customer customer = customerRepository.getById(customerId);
@@ -67,7 +78,7 @@ public class CustomerController {
                 .filter(s -> s.getCustomerId().equals(customer)).toList();
         List<Track> customerTracks = new ArrayList<>();
         for (int i = 0; i < customerInvoices.size(); i++) {
-            customerTracks.addAll(ic.getTracksFromInvoice(customerInvoices.get(i)));
+            customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
         }
         return customerTracks;
     }
