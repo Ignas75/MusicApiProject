@@ -16,22 +16,23 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 
-public class TrackEntityTest {
-//    @Test
-//    @DisplayName("GET request for track_id = 1")
-//    public void getTrack(){
-//        ObjectMapper mapper = new ObjectMapper();
-//        TrackPOJO track;
-//        try {
-//            track = mapper.readValue(new URL("http://localhost:8080/chinook/track/read?id=2"), TrackPOJO.class);
-//            Assertions.assertEquals(2, track.getId());
-//            Assertions.assertEquals("For Those About To Rock (We Salute You)", track.getName());
-//            Assertions.assertEquals("For Those About To Rock We Salute You", track.getAlbumId().getTitle());
-//            Assertions.assertEquals("Rock", track.getGenreId().getName());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+public class TrackControllerTest {
+    //TODO - track/buy, track/update, track/delete <- delete isn't finished yet :(
+    @Test
+    @DisplayName("GET request for track_id = 1")
+    public void getTrack(){
+        ObjectMapper mapper = new ObjectMapper();
+        TrackPOJO track;
+        try {
+            track = mapper.readValue(new URL("http://localhost:8080/chinook/track/read?id=1"), TrackPOJO.class);
+            Assertions.assertEquals(1, track.getId());
+            Assertions.assertEquals("For Those About To Rock (We Salute You)", track.getName());
+            Assertions.assertEquals("For Those About To Rock We Salute You", track.getAlbumId().getTitle());
+            Assertions.assertEquals("Rock", track.getGenreId().getName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     @DisplayName("POST creating a new track")

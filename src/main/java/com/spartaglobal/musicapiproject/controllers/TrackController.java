@@ -56,8 +56,11 @@ public class TrackController {
 
     @GetMapping("chinook/track/read")
     public ResponseEntity readTrack(@RequestParam Integer id){
-        Track track = trackRepository.getById(id);
-        return new ResponseEntity(track,HttpStatus.OK);
+        Optional<Track> track = trackRepository.findById(id);
+        if (track.isPresent()) {
+            return new ResponseEntity(track,HttpStatus.OK);
+        }
+        return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
     @PutMapping(value = "/chinook/track/update")
