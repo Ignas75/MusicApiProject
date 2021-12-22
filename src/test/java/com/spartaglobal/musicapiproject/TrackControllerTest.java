@@ -114,7 +114,7 @@ public class TrackControllerTest {
                 .uri(new URI("http://localhost:8080/chinook/track/create"))
                 .POST(HttpRequest.BodyPublishers.ofFile(Path.of("src/test/java/com/spartaglobal/musicapiproject/json/track.json")))
                 .header("content-type", "application/json")
-                .header("Authorization", "Basic ihKc6Ot7BE9MtptdVG5e")
+                .header("Authorization", "Basic OZHBA3FRVrTGXzfwdTsi")
                 .build();
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> resp = client.send(req,
@@ -127,4 +127,28 @@ public class TrackControllerTest {
         Assertions.assertEquals("Jagged Little Pill", track.getAlbumId().getTitle());
         Assertions.assertEquals("Alanis Morissette & Glenn Ballard", track.getComposer());
     }
+
+    @Test
+    @DisplayName("PUT updating a new track")
+    public void updateTrackHttpClientVersion() throws IOException, InterruptedException, URISyntaxException {
+        HttpRequest req = HttpRequest
+                .newBuilder()
+                .uri(new URI("http://localhost:8080/chinook/track/update"))
+                .PUT(HttpRequest.BodyPublishers.ofFile(Path.of("src/test/java/com/spartaglobal/musicapiproject/json/updateTrack.json")))
+                .header("content-type", "application/json")
+                .header("Authorization", "Basic OZHBA3FRVrTGXzfwdTsi")
+                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> resp = client.send(req,
+                HttpResponse.BodyHandlers.ofString());
+        String json = resp.body();
+        ObjectMapper mapper = new ObjectMapper();
+        TrackPOJO track = mapper.readValue(json, TrackPOJO.class);
+        System.out.println("Updated track with id = " + track.getId());
+        Assertions.assertEquals("MacBeth", track.getName());
+        Assertions.assertEquals("Greatest Kiss", track.getAlbumId().getTitle());
+        Assertions.assertEquals("S. Penridge, Bob Ezrin, Peter Criss", track.getComposer());
+    }
+
+
 }

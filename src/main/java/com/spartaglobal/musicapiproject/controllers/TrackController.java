@@ -82,13 +82,13 @@ public class TrackController {
     @PutMapping(value = "/chinook/track/update")
     public ResponseEntity updateTrack(@RequestBody Track newState, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/track/update")){
+        if(!as.isAuthorizedForAction(token,"/chinook/track/update")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Track> oldState = trackRepository.findById(newState.getId());
         if(oldState.isEmpty()) return null;
         trackRepository.save(newState);
-        return new ResponseEntity("Track updated", HttpStatus.OK);
+        return new ResponseEntity(newState, HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/chinook/track/delete")
