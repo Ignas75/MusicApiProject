@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS EndpointPermissions;
 DROP TABLE IF EXISTS Roles;
 DROP TABLE IF EXISTS Tokens;
+DROP TABLE IF EXISTS ArchiveInvoices;
 DROP VIEW IF EXISTS TrackPopularityByCountry;
 DROP VIEW IF EXISTS AlbumPopularityByCountry;
 DROP VIEW IF EXISTS GenrePopularityByCountry;
@@ -11,6 +12,7 @@ DROP VIEW IF EXISTS GlobalArtistPopularity;
 DROP VIEW IF EXISTS GlobalPlaylistPopularity;
 DROP VIEW IF EXISTS GlobalGenrePopularity;
 DROP VIEW IF EXISTS GlobalTrackPopularity;
+
 
 CREATE TABLE EndpointPermissions(
                                     rowID INTEGER AUTO_INCREMENT PRIMARY KEY,
@@ -34,6 +36,17 @@ CREATE table Tokens (
                         dateCreated DATE NOT NULL,
                         CONSTRAINT PK_Token PRIMARY KEY (tokenID),
                         FOREIGN KEY (roleID) REFERENCES Roles(roleID)
+);
+
+CREATE TABLE ArchiveInvoices (
+                                 ArchiveID INT auto_increment NOT NULL Primary KEY,
+                                 firstName VARCHAR(50) NOT NULL,
+                                 lastName VARCHAR(50) NOT NULL,
+                                 EmailAddress VARCHAR(50) NOT NULL,
+                                 Address VARCHAR(255),
+                                 PostalCode VARCHAR(10),
+                                 InvoiceDate DATETIME NOT NULL,
+                                 Total DECIMAL(10,2) NOT NULL
 );
 
 INSERT INTO EndpointPermissions(url,isForCustomer,isForSalesStaff,isForAdmins)
