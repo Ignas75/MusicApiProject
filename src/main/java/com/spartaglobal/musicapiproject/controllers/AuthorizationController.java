@@ -89,7 +89,7 @@ public class AuthorizationController {
         headers.add("content-type", "application/json");
         if(tokenRepository.existsByEmail(emailAddress)){
             tokenRepository.delete(tokenRepository.getByEmail(emailAddress));
-            return new ResponseEntity<>("{\"message\": \"Token cleared. You will need a new token to use the services again.\"}", headers, HttpStatus.PRECONDITION_FAILED);
+            return new ResponseEntity<>("{\"message\": \"Token cleared. You will need a new token to use the services again.\"}", headers, HttpStatus.OK);
         } else {
             return new ResponseEntity<>("{\"message\": \"email address not registered\"}", headers, HttpStatus.NOT_FOUND);
         }
