@@ -42,20 +42,20 @@ public class BasketController {
 
      */
 
-    @PostMapping(value ="/fxtgdwq")
+    @PostMapping(value ="/chinook/basket/add")
     public Basket addToDb(@RequestBody Basket b){
         if(b.getId().equals(trackRepository.findById(b.getId())))  //checking to see if the id is in track repo
             return basketRepository.save(b);
         else return null;
     }
 
-    @PostMapping(value="/cdgyu")
-    public Basket insertSomethingInBasket(@RequestBody Basket b){
+    @PostMapping(value="//chinook/basket/add1")
+    public Basket insertSomethingInBasket(@RequestBody Basket b) {
         return basketRepository.save(b);
     }
 
-    @DeleteMapping(value="/hncus")
-    public void deleteTrack( Integer id) {
+    @DeleteMapping(value="//chinook/basket/delete/{id}")
+    public void deleteTrack(@RequestParam Integer id) {
         basketRepository.deleteById(id);
     }
 
