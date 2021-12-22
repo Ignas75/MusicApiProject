@@ -28,7 +28,10 @@ public class InvoiceController {
     @Autowired
     private InvoicelineRepository invoiceLineRepository;
 
-    public void createInvoice(List<Track> tracks, Customer customer){
+    public boolean createInvoice(List<Track> tracks, Customer customer){
+        if(tracks.isEmpty()){
+            return false;
+        }
         Invoice newInvoice = new Invoice();
         newInvoice.setInvoiceDate(Instant.now());
         newInvoice.setBillingAddress(customer.getAddress());
@@ -46,7 +49,9 @@ public class InvoiceController {
         for (int i = 0; i < tracks.size(); i++) {
             createInvoiceLine(newInvoice, tracks.get(i));
          }
+        return true;
     }
+
     private void createInvoiceLine(Invoice invoice, Track track){
         Invoiceline invoiceLine = new Invoiceline();
         invoiceLine.setInvoiceId(invoice);
@@ -56,10 +61,20 @@ public class InvoiceController {
         invoiceLineRepository.save(invoiceLine);
     }
 
+    public List<Track> getTracksFromInvoice(Invoice invoice){
+        List<Track> tracks = new java.util.ArrayList<>();
+        List<Invoiceline> invoiceLines = invoiceLineRepository.findAll()
+                .stream().filter(s->s.getInvoiceId().equals(invoice.getId())).toList();
+        for (Invoiceline invoiceLine : invoiceLines) {
+            tracks.add(invoiceLine.getTrackId());
+        }
+        return tracks;
+    }
+
     public void viewInvoice(){
 //TODO, Ignas to check with Neil
     }
-    @DeleteMapping("chinook/invoice/delete")
+    @DeleteMapping("/chinook/invoice/delete")
     public ResponseEntity deleteInvoice(@RequestHeader("Authorization") String authTokenHeader,@RequestParam Integer id){
         String token = authTokenHeader.split(" ")[1];
         AuthorizationService as = new AuthorizationService();
