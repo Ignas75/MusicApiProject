@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ArtistPopularityByCountryRepository extends JpaRepository<ArtistPopularityByCountry, String> {
-    List<ArtistPopularityByCountry> getTopByPopularity(Sort sort);
+    List<ArtistPopularityByCountry> findAllByBillingCountry(String country, Sort sort);
 }

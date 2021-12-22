@@ -11,10 +11,11 @@ import javax.persistence.Table;
 @Immutable
 @Table(name = "albumpopularitybycountry")
 public class AlbumPopularityByCountry {
-    @Id
+
     @Column(name = "BillingCountry", length = 40)
     private String billingCountry;
 
+    @Id
     @Column(name = "Title", nullable = false, length = 160)
     private String title;
 
