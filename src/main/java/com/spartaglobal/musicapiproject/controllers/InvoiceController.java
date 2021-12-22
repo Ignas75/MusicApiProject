@@ -26,55 +26,6 @@ public class InvoiceController {
     @Autowired
     private InvoiceRepository invoiceRepository;
 
-    @Autowired
-    private InvoicelineRepository invoiceLineRepository;
-
-    public boolean createInvoice(List<Track> tracks, Customer customer){
-        if(tracks.isEmpty()){
-            return false;
-        }
-        Invoice newInvoice = new Invoice();
-        newInvoice.setInvoiceDate(Instant.now());
-        newInvoice.setBillingAddress(customer.getAddress());
-        newInvoice.setBillingCountry(customer.getCountry());
-        newInvoice.setBillingCity(customer.getCity());
-        newInvoice.setBillingState(customer.getState());
-        newInvoice.setBillingPostalCode(customer.getPostalCode());
-        newInvoice.setCustomerId(customer);
-        BigDecimal total = BigDecimal.valueOf(0);
-        for (int i = 0; i < tracks.size(); i++) {
-            total = total.add(tracks.get(i).getUnitPrice());
-        }
-        newInvoice.setTotal(total);
-        invoiceRepository.save(newInvoice);
-        List<Invoiceline> allInvoiceLineTracks = new ArrayList<>();
-        for (int i = 0; i < tracks.size(); i++) {
-            createInvoiceLine(newInvoice, tracks.get(i));
-            allInvoiceLineTracks.add(createInvoiceLine(newInvoice, tracks.get(i)));
-         }
-        invoiceLineRepository.saveAllAndFlush(allInvoiceLineTracks);
-        return true;
-    }
-
-    private Invoiceline createInvoiceLine(Invoice invoice, Track track){
-        Invoiceline invoiceLine = new Invoiceline();
-        invoiceLine.setInvoiceId(invoice);
-        invoiceLine.setQuantity(1);
-        invoiceLine.setTrackId(track);
-        invoiceLine.setUnitPrice(track.getUnitPrice());
-        return invoiceLine;
-    }
-
-    public List<Track> getTracksFromInvoice(Invoice invoice){
-        List<Track> tracks = new java.util.ArrayList<>();
-        List<Invoiceline> invoiceLines = invoiceLineRepository.findAll()
-                .stream().filter(s->s.getInvoiceId().equals(invoice.getId())).toList();
-        for (Invoiceline invoiceLine : invoiceLines) {
-            tracks.add(invoiceLine.getTrackId());
-        }
-        return tracks;
-    }
-
     public void viewInvoice(){
 //TODO, Ignas to check with Neil
     }
