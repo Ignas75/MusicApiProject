@@ -94,16 +94,17 @@ public class PlaylistController {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
         if (dataFormat.equals("application/json")){
-            headers.add("content-type", "application/json");
+            headers.setContentType(MediaType.APPLICATION_JSON);
         }
-        headers.add("content-type", "application/xml");
+        headers.setContentType(MediaType.APPLICATION_XML);
         if (!as.isAuthorizedForAction(token, "chinook/playlist/buy")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Token user = tokenRepository.getByAuthToken(token);
         Customer customer = customerRepository.getCustomerByEmail(user.getEmail());
         if (customer == null) {
-            return new ResponseEntity<>("{\"Customer not found\"}", HttpStatus.OK);
+
+            return new ResponseEntity<String>("{\"Message\":\"Customer not found\"}", headers,HttpStatus.OK);
         }
         /* Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
@@ -117,8 +118,8 @@ public class PlaylistController {
         }
         allTracks.remove(cc.getCustomerTracks(customer.getId()));
         if(inv.createInvoice(allTracks, customer)){
-            return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
+            return new ResponseEntity<>("{\"Message\":\"Playlist Purchase Complete\"}",headers, HttpStatus.OK);
         }
-        return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);
+        return new ResponseEntity<>("{\"Message\":\"Customer already owns all tracks in the playlist\"}",headers, HttpStatus.OK);
     }
 }
