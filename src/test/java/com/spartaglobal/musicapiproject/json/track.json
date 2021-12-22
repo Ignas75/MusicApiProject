@@ -1,11 +1,11 @@
 {
-  "name": "Test tracks",
+  "name": "See Right Through You Mate",
   "albumId": {
-    "id": 1,
-    "title": "testing tracks",
+    "id": 6,
+    "title": "Jagged Little Pill",
     "artistId": {
-      "id": 1,
-      "name": "AC/DC"
+      "id": 4,
+      "name": "Alanis Morissette"
     }
   },
   "mediaTypeId": {
@@ -16,8 +16,8 @@
     "id": 1,
     "name": "Rock"
   },
-  "composer": "Angus Young",
-  "milliseconds": 343719,
-  "bytes": 11170334,
+  "composer": "Alanis Morissette & Glenn Ballard",
+  "milliseconds": 176117,
+  "bytes": 5793082,
   "unitPrice": 0.99
 }

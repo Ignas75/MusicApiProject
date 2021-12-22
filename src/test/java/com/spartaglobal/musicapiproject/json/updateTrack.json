@@ -1,0 +1,24 @@
+{
+  "id": 450,
+  "name": "MacBeth",
+  "albumId": {
+    "id": 37,
+    "title": "Greatest Kiss",
+    "artistId": {
+      "id": 52,
+      "name": "Kiss"
+    }
+  },
+  "mediaTypeId": {
+    "id": 1,
+    "name": "MPEG audio file"
+  },
+  "genreId": {
+    "id": 1,
+    "name": "Rock"
+  },
+  "composer": "S. Penridge, Bob Ezrin, Peter Criss",
+  "milliseconds": 166974,
+  "bytes": 5360574,
+  "unitPrice": 0.99
+}

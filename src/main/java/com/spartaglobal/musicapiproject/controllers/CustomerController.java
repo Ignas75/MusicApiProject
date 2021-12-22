@@ -8,6 +8,7 @@ import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
 import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.InvoiceRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,36 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-/*
-This class contained the following method,
-I have no idea what is it for, but I will keep the code just in case
-
-    @GetMapping(value="chinook/sales/customer")
-    public Customer getCustomerByEmailAddress(@RequestParam Integer customerID, @RequestHeader("Authorization") String authToken){
-        String token[] = authToken.split(" ");
-        if (aS.isAuthorizedForAction(token[1],"chinook/sales/customer")) {
-
-        }
-        return null;
-    }
-
-*/
-
-
-/*
-That's the point in the method below?
-Is there something I am forgetting or is this method just calling itself?
-
-        public Customer getCustomerByEmail(String emailAddress){
-        if (customerRepository.existsByEmail(emailAddress)){
-            Customer customer = customerRepository.getCustomerByEmail(emailAddress);
-            return customer;
-         }
-        return null;
-    }
-
-*/
 
 @RestController
 public class CustomerController {
@@ -59,7 +30,7 @@ public class CustomerController {
     @Autowired
     private AuthorizationService as;
     @Autowired
-    private InvoiceController ic;
+    private InvoiceService is;
 
 
     @PostMapping("/chinook/customer/create")
@@ -79,6 +50,7 @@ public class CustomerController {
         return new ResponseEntity(customer, HttpStatus.OK);
     }
 
+
     @PutMapping("/chinook/customer/update")
     public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
@@ -91,10 +63,12 @@ public class CustomerController {
         return new ResponseEntity("Customer updated", HttpStatus.OK);
     }
 
+
     @DeleteMapping("/chinook/customer/delete")
     public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+
             return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         customerRepository.delete(customerRepository.getById(id));
@@ -108,10 +82,11 @@ public class CustomerController {
                 .filter(s -> s.getCustomerId().equals(customer)).toList();
         List<Track> customerTracks = new ArrayList<>();
         for (int i = 0; i < customerInvoices.size(); i++) {
-            customerTracks.addAll(ic.getTracksFromInvoice(customerInvoices.get(i)));
+            customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
         }
         return customerTracks;
     }
+
 
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
         Album album = albumRepository.getById(albumId);

@@ -3,9 +3,11 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +41,7 @@ public class PlaylistController {
     private CustomerController cc = new CustomerController();
 
     @Autowired
-    private InvoiceController inv = new InvoiceController();
+    private InvoiceService is;
 
 
 
@@ -88,17 +90,21 @@ public class PlaylistController {
         }
     }
 
-    @PostMapping(value = "/chinook/playlist/buy")
-    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken) {
+    @PostMapping(value = "chinook/playlist/buy")
+    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String dataFormat ) {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
+        if (dataFormat.equals("application/json")){
+            headers.add("content-type", "application/json");
+        }
+        headers.add("content-type", "application/xml");
         if (!as.isAuthorizedForAction(token, "chinook/playlist/buy")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Token user = tokenRepository.getByAuthToken(token);
         Customer customer = customerRepository.getCustomerByEmail(user.getEmail());
         if (customer == null) {
-            return new ResponseEntity<>("Customer not found", HttpStatus.OK);
+            return new ResponseEntity<>("{\"Customer not found\"}", HttpStatus.OK);
         }
         /* Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
@@ -111,7 +117,7 @@ public class PlaylistController {
             allTracks.add(trackRepository.getById(t.getId().getTrackId()));
         }
         allTracks.remove(cc.getCustomerTracks(customer.getId()));
-        if(inv.createInvoice(allTracks, customer)){
+        if(is.createInvoice(allTracks, customer)){
             return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
         }
         return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);

@@ -40,6 +40,8 @@ public class PurchaseController {
     CustomerRepository customerRepository;
     @Autowired
     TrackRepository trackRepository;
+    @Autowired
+    AuthorizationService authorizationService;
 
     public List<Track> getUserTracks(Integer customerId){
         List<Invoice> invoices = new ArrayList<>();
@@ -131,7 +133,7 @@ public class PurchaseController {
                                                 @RequestParam String billingAddress, @RequestParam String billingCity,
                                                 @RequestParam String billingCountry, @RequestParam String postalCode,
                                                 @RequestHeader("Authorization") String authToken){
-        AuthorizationService authorizationService = new AuthorizationService();
+
         if(!authorizationService.isAuthorizedForAction(authToken.split(" ")[3], "chinook/album/purchase")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
