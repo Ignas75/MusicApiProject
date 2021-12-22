@@ -89,17 +89,21 @@ public class PlaylistController {
         }
     }
 
-    @PostMapping(value = "chinook/playlist/buy", produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken) {
+    @PostMapping(value = "chinook/playlist/buy")
+    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String dataFormat ) {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
+        if (dataFormat.equals("application/json")){
+            headers.add("content-type", "application/json");
+        }
+        headers.add("content-type", "application/xml");
         if (!as.isAuthorizedForAction(token, "chinook/playlist/buy")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Token user = tokenRepository.getByAuthToken(token);
         Customer customer = customerRepository.getCustomerByEmail(user.getEmail());
         if (customer == null) {
-            return new ResponseEntity<>("Customer not found", HttpStatus.OK);
+            return new ResponseEntity<>("{\"Customer not found\"}", HttpStatus.OK);
         }
         /* Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
