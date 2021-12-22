@@ -22,17 +22,6 @@ public class UserContentSearch {
 
     Set<UserSearchable> searchSet = new HashSet<>();
 
-    @GetMapping(value = "/chinook/track")
-    public Optional<Track> getTrack(@RequestParam Integer id) {
-        Optional<Track> result = trackRepository.findById(id);
-        return result;
-    }
-
-    @GetMapping(value = "/chinook/tracks")
-    public List<Track> getActors() {
-        return trackRepository.findAll();
-    }
-
     @GetMapping(value = "/chinook/search")
     public Set<UserSearchable> getQuery(@RequestParam String name) {
         List<Track> tracks = trackRepository.findAll();
