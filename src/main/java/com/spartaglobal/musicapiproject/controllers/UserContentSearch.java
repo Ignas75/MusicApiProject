@@ -7,6 +7,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+/*
+This class contains one function that acts like a search engine
+you can enter a search string and it will search through
+album names, artist names, genre names, playlist names and track names.
+
+I don't recall seeing this in the client requirements.
+If we want to keep it then we should refactor the code to use
+streams and matchers for faster results.
+
+*/
+
 @RestController
 public class UserContentSearch {
     @Autowired

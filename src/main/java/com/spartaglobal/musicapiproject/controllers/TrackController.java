@@ -25,26 +25,35 @@ public class TrackController {
     private CustomerRepository customerRepository;
     @Autowired
     private AuthorizationService as;
-
-    @GetMapping("chinook/track/buy")
-    public ResponseEntity buyTrack(@RequestParam Integer id, @RequestBody String token){
+    @Autowired
+    private CustomerController cc;
+    
+    @GetMapping("/chinook/track/buy")
+    public ResponseEntity buyTrack(@RequestParam Integer id, @RequestBody String authTokenHeader){
+        String token = authTokenHeader.split(" ")[1];
+        if(as.isAuthorizedForAction(token,"chinook/track/buy")){
+            return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
+        }
         String customerEmail;
         try {
             customerEmail = tokenRepository.findAll().stream().filter(s -> Objects.equals(s.getAuthToken(), token)).toList().get(0).getEmail();
         }catch (IndexOutOfBoundsException e){
-            return new ResponseEntity<>("PLACEHOLDER",HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Token Not Valid",HttpStatus.FORBIDDEN);
         }
         List<Track> t  = trackRepository.findById(id).stream().toList();
         if (t.isEmpty()){
             return new ResponseEntity<>("Track does not exist", HttpStatus.NO_CONTENT);
         }
         Customer c = customerRepository.findAll().stream().filter(s-> Objects.equals(s.getEmail(), customerEmail)).toList().get(0);
+        if(cc.getCustomerTracks(c.getId()).equals(t)){
+            return new ResponseEntity<>("Customer already owns the track", HttpStatus.OK);
+        }
         InvoiceController newInvoice = new InvoiceController();
         newInvoice.createInvoice(t,c);
-        return new ResponseEntity<>("Invoice created", HttpStatus.OK);
+        return new ResponseEntity<>("Invoice(s) created", HttpStatus.OK);
     }
 
-    @PostMapping("chinook/track/create")
+    @PostMapping("/chinook/track/create")
     public ResponseEntity createTrack(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Track newTrack){
         String token = authTokenHeader.split(" ")[1];
         if(as.isAuthorizedForAction(token,"chinook/track/create")){
@@ -54,7 +63,7 @@ public class TrackController {
         return new ResponseEntity<>("Track Created", HttpStatus.OK);
     }
 
-    @GetMapping("chinook/track")
+    @GetMapping("/chinook/track")
     public ResponseEntity readTrack(@RequestParam Integer id){
         Track track = trackRepository.getById(id);
         return new ResponseEntity(track,HttpStatus.OK);
@@ -63,7 +72,7 @@ public class TrackController {
     @PutMapping(value = "/chinook/track/update")
     public ResponseEntity updateTrack(@RequestBody Track newState, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/track/create")){
+        if(as.isAuthorizedForAction(token,"chinook/track/update")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Track> oldState = trackRepository.findById(newState.getId());
@@ -71,10 +80,11 @@ public class TrackController {
         trackRepository.save(newState);
         return new ResponseEntity("Track updated", HttpStatus.OK);
     }
+
     @DeleteMapping(value = "/chinook/track/delete")
     public ResponseEntity deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/track/create")){
+        if(as.isAuthorizedForAction(token,"chinook/track/delete")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         trackRepository.delete(trackRepository.getById(id));

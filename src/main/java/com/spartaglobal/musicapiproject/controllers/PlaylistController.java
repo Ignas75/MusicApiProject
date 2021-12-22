@@ -1,49 +1,119 @@
 package com.spartaglobal.musicapiproject.controllers;
 
-import com.spartaglobal.musicapiproject.entities.Album;
-import com.spartaglobal.musicapiproject.entities.Playlist;
-import com.spartaglobal.musicapiproject.entities.Playlisttrack;
-import com.spartaglobal.musicapiproject.repositories.PlaylistRepository;
-import com.spartaglobal.musicapiproject.repositories.PlaylisttrackRepository;
+import com.spartaglobal.musicapiproject.entities.*;
+import com.spartaglobal.musicapiproject.repositories.*;
+import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
-
-
 import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
 public class PlaylistController {
+
+    @Autowired
+    private PlaylisttrackRepository playlisttrackRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private TrackRepository trackRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
     @Autowired
     private PlaylistRepository playlistRepo;
     @Autowired
     private PlaylisttrackRepository playlistTrackRepo;
 
+    @Autowired
+    private AuthorizationService as = new AuthorizationService();
+
+    @Autowired
+    private CustomerController cc = new CustomerController();
+
+    @Autowired
+    private InvoiceController inv = new InvoiceController();
+
+
+
+
+    @GetMapping(value = "/chinook/playlist")
+    public Playlist getTrack(@RequestParam Integer id) {
+        Optional<Playlist> result = playlistRepo.findById(id);
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            return null;
+        }
+    }
+
     @Transactional
-    @DeleteMapping(value = "/chinook/delete/playlist")
+    @DeleteMapping(value = "/chinook/playlist/delete")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deletePlaylist(@RequestParam Integer id) {
         playlistTrackRepo.deleteByIdPlaylistId(id);
         playlistRepo.deleteById(id);
     }
 
-    @PostMapping(value="/Chinook/new-playlist-track")
-    public Playlisttrack createPlaylist(@Valid @RequestBody Playlisttrack playlisttrack){
+    @PostMapping(value = "/chinook/playlist/add")
+    public Playlisttrack addTrackToPlaylist(@Valid @RequestBody Playlisttrack playlisttrack) {
         return playlistTrackRepo.save(playlisttrack);
     }
 
-    @PatchMapping(value="/Chinook/update-playlist")
-    public Playlist updateAlbum(@Valid @RequestBody Playlist playlist1){
+    @PostMapping(value = "/chinook/playlist/remove")
+    public Playlisttrack removeTrackFromPlaylist(@Valid @RequestBody Playlisttrack playlisttrack) {
+        return playlistTrackRepo.save(playlisttrack);
+    }
+
+    @PostMapping(value = "/chinook/playlist/create")
+    public Playlist addTrackToPlaylist(@Valid @RequestBody Playlist playlist) {
+        return playlistRepo.save(playlist);
+    }
+
+    @PatchMapping(value = "/chinook/playlist/update")
+    public Playlist updateAlbum(@Valid @RequestBody Playlist playlist1) {
         Optional<Playlist> res = playlistRepo.findById(playlist1.getId());
-        if(res.isPresent()){
+        if (res.isPresent()) {
             playlistRepo.save(playlist1);
             return playlist1;
         } else {
             return null;
         }
+    }
+
+    @PostMapping(value = "/chinook/playlist/buy")
+    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken) {
+        String token = authToken.split(" ")[1];
+        HttpHeaders headers = new HttpHeaders();
+        if (!as.isAuthorizedForAction(token, "chinook/playlist/buy")) {
+            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
+        Token user = tokenRepository.getByAuthToken(token);
+        Customer customer = customerRepository.getCustomerByEmail(user.getEmail());
+        if (customer == null) {
+            return new ResponseEntity<>("Customer not found", HttpStatus.OK);
+        }
+        /* Finds all the tracks based on the playlist id*/
+        List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
+                .stream()
+                .filter(s -> Objects.equals(s.getId().getPlaylistId(), playListId))
+                .toList();
+
+        List<Track> allTracks = new ArrayList<>();
+        for (Playlisttrack t : allPlaylistTracks) {
+            allTracks.add(trackRepository.getById(t.getId().getTrackId()));
+        }
+        allTracks.remove(cc.getCustomerTracks(customer.getId()));
+        if(inv.createInvoice(allTracks, customer)){
+            return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);
     }
 }
