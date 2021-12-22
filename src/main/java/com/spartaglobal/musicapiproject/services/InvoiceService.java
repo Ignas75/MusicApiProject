@@ -38,7 +38,6 @@ public class InvoiceService {
             total = total.add(tracks.get(i).getUnitPrice());
         }
         newInvoice.setTotal(total);
-        System.out.println(newInvoice.getBillingAddress());
         invoiceRepository.save(newInvoice);
         List<Invoiceline> allInvoiceLineTracks = new ArrayList<>();
         for (int i = 0; i < tracks.size(); i++) {
