@@ -6,6 +6,7 @@ import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
 import com.spartaglobal.musicapiproject.repositories.TrackRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,36 +28,42 @@ public class TrackController {
     private AuthorizationService as;
     @Autowired
     private CustomerController cc;
+    @Autowired
+    private InvoiceService is;
     
     @GetMapping("/chinook/track/buy")
-    public ResponseEntity buyTrack(@RequestParam Integer id, @RequestBody String authTokenHeader){
+    public ResponseEntity buyTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/track/buy")){
-            return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
-        }
+        // Valid token check
         String customerEmail;
         try {
-            customerEmail = tokenRepository.findAll().stream().filter(s -> Objects.equals(s.getAuthToken(), token)).toList().get(0).getEmail();
-        }catch (IndexOutOfBoundsException e){
+            customerEmail = tokenRepository.getByAuthToken(token).getEmail();
+        }catch (NullPointerException e){
             return new ResponseEntity<>("Token Not Valid",HttpStatus.FORBIDDEN);
         }
+        // Authorized to carry out purchase
+        if(!as.isAuthorizedForAction(token,"/chinook/track/buy")){
+            return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
+        }
+        // Find track
         List<Track> t  = trackRepository.findById(id).stream().toList();
         if (t.isEmpty()){
             return new ResponseEntity<>("Track does not exist", HttpStatus.NO_CONTENT);
         }
+        // Find customer
         Customer c = customerRepository.findAll().stream().filter(s-> Objects.equals(s.getEmail(), customerEmail)).toList().get(0);
         if(cc.getCustomerTracks(c.getId()).equals(t)){
             return new ResponseEntity<>("Customer already owns the track", HttpStatus.OK);
         }
-        InvoiceController newInvoice = new InvoiceController();
-        newInvoice.createInvoice(t,c);
+        // Create invoice
+        is.createInvoice(t,c);
         return new ResponseEntity<>("Invoice(s) created", HttpStatus.OK);
     }
 
     @PostMapping("/chinook/track/create")
     public ResponseEntity createTrack(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Track newTrack){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/track/create")){
+        if(!as.isAuthorizedForAction(token,"/chinook/track/create")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         trackRepository.save(newTrack);

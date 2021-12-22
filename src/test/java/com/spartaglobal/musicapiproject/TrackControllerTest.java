@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,6 +17,42 @@ import java.nio.file.Path;
 
 public class TrackControllerTest {
     //TODO - track/buy, track/update, track/delete <- delete isn't finished yet :(
+
+    // Customer, Staff, Admin, Invalid Id, Valid Id, Invalid token, Valid token
+    @Test
+    @DisplayName("Customer successfully buys track")
+    public void buyTrack() throws IOException, InterruptedException, URISyntaxException{
+        HttpRequest req = HttpRequest
+                .newBuilder()
+                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
+                .GET()
+                .header("content-type", "application/json")
+                .header("Authorization", "Basic JJVXUgNu6zoGeeyZsYa1")
+                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> resp = client.send(req,
+                HttpResponse.BodyHandlers.ofString());
+        String json = resp.body();
+        Assertions.assertEquals("Invoice(s) created", json);
+    }
+
+    @Test
+    @DisplayName("Invalid token when buying track")
+    public void buyTrackInvalid() throws IOException, InterruptedException, URISyntaxException{
+        HttpRequest req = HttpRequest
+                .newBuilder()
+                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
+                .GET()
+                .header("content-type", "application/json")
+                .header("Authorization", "Basic invalidtoken")
+                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> resp = client.send(req,
+                HttpResponse.BodyHandlers.ofString());
+        String json = resp.body();
+        Assertions.assertEquals("Token Not Valid", json);
+    }
+
     @Test
     @DisplayName("GET request for track_id = 1")
     public void getTrack(){
@@ -42,7 +77,7 @@ public class TrackControllerTest {
                 .uri(new URI("http://localhost:8080/chinook/track/create"))
                 .POST(HttpRequest.BodyPublishers.ofFile(Path.of("src/test/java/com/spartaglobal/musicapiproject/json/track.json")))
                 .header("content-type", "application/json")
-                .header("Authorization", "Basic iB4GDQQTJsvBYH2CSPSI")
+                .header("Authorization", "Basic ihKc6Ot7BE9MtptdVG5e")
                 .build();
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> resp = client.send(req,
