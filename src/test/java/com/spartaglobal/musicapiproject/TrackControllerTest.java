@@ -5,6 +5,8 @@ import com.spartaglobal.musicapiproject.pojo.TrackPOJO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,7 +40,42 @@ public class TrackControllerTest {
 
     @Test
     @DisplayName("Invalid token when buying track")
-    public void buyTrackInvalid() throws IOException, InterruptedException, URISyntaxException{
+    public void buyTrackInvalidToken() throws IOException, InterruptedException, URISyntaxException{
+        HttpRequest req = HttpRequest
+                .newBuilder()
+                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
+                .GET()
+                .header("content-type", "application/json")
+                .header("Authorization", "Basic invalidtoken")
+                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> resp = client.send(req,
+                HttpResponse.BodyHandlers.ofString());
+        String json = resp.body();
+        Assertions.assertEquals("Token Not Valid", json);
+    }
+
+    @Test
+    @DisplayName("Invalid token when buying track")
+    public void buyTrackAuthorized() throws IOException, InterruptedException, URISyntaxException{
+        HttpRequest req = HttpRequest
+                .newBuilder()
+                .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
+                .GET()
+                .header("content-type", "application/json")
+                .header("Authorization", "Basic invalidtoken")
+                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpResponse<String> resp = client.send(req,
+                HttpResponse.BodyHandlers.ofString());
+        String json = resp.body();
+        Assertions.assertEquals("Token Not Valid", json);
+    }
+
+    @ParameterizedTest
+    @DisplayName("Invalid token when buying track")
+    @ValueSource(strings = {"1YrKpXYZUZLlCTakT9MT"}) // admin and staff tokens
+    public void buyTrackUnauthorized() throws IOException, InterruptedException, URISyntaxException{
         HttpRequest req = HttpRequest
                 .newBuilder()
                 .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
