@@ -23,10 +23,14 @@ public class DiscontinuedTrackController {
     @Autowired
     private TrackRepository trackRepository;
 
+    // TODO: check if authentication would be advised to used here
     @GetMapping(value = "/chinook/discontinuedtrack")
-    public Optional<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
+    public ResponseEntity<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
         Optional<DiscontinuedTrack> result = discontinuedTrackRepository.findById(id);
-        return result;
+        if(result.isEmpty()){
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/chinook/discontinuedtrack/delete")
