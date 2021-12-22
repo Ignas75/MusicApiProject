@@ -1,6 +1,8 @@
 package com.spartaglobal.musicapiproject;
 
+import com.spartaglobal.musicapiproject.pojo.ArtistId;
 import com.spartaglobal.musicapiproject.requests.ArtistRequest;
+import com.spartaglobal.musicapiproject.requests.RequestBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
@@ -11,14 +13,8 @@ public class ArtistControllerTest {
 
     @Test
     public void getArtistIdTest() throws IOException, URISyntaxException, InterruptedException {
-        HttpResponse<String> resp = ArtistRequest.getArtistRequest(1);
-        Assertions.assertEquals(1, ArtistRequest.returnJsonBody(resp).getId());
-    }
-
-    @Test
-    public void getArtistNameTest() throws IOException, URISyntaxException, InterruptedException {
-        HttpResponse<String> resp = ArtistRequest.getArtistRequest(1);
-        Assertions.assertEquals("AC/DC", ArtistRequest.returnJsonBody(resp).getName());
+        ArtistId artist = RequestBuilder.getArtistRequest(1);
+        Assertions.assertEquals(1, artist.getId());
     }
 
     @Test

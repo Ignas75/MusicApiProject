@@ -1,6 +1,7 @@
 package com.spartaglobal.musicapiproject.requests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spartaglobal.musicapiproject.pojo.ArtistId;
 import com.spartaglobal.musicapiproject.pojo.TrackPOJO;
 
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.net.http.HttpResponse;
 import java.nio.file.Path;
 
 public class RequestBuilder {
+
+    private static ObjectMapper mapper = new ObjectMapper();
 
     private static HttpResponse<String> trackRequest(String endpoint, Integer id, String token, String requestType)
             throws IOException, InterruptedException, URISyntaxException {
@@ -48,6 +51,21 @@ public class RequestBuilder {
         return resp;
     }
 
+    private static TrackPOJO trackMapper(String json) {
+        TrackPOJO track = null;
+        try {
+            track = mapper.readValue(json, TrackPOJO.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return track;
+    }
+
+    private static ArtistId artistMapper(HttpResponse<String> resp) throws JsonProcessingException {
+        ArtistId artist = mapper.readValue(resp.body(), ArtistId.class);
+        return artist;
+    }
+
     public static TrackPOJO getTrackRequest(Integer id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> resp = trackRequest("/chinook/track/read", id, null, "GET");
         String json = resp.body();
@@ -71,14 +89,9 @@ public class RequestBuilder {
         return resp.body();
     }
 
-    private static TrackPOJO trackMapper(String json) {
-        ObjectMapper mapper = new ObjectMapper();
-        TrackPOJO track = null;
-        try {
-            track = mapper.readValue(json, TrackPOJO.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return track;
+    public static ArtistId getArtistRequest(Integer id) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> resp = trackRequest("/chinook/artist", id, null, "GET");
+        return artistMapper(resp);
     }
+
 }

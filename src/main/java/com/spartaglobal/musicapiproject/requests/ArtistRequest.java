@@ -12,18 +12,18 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ArtistRequest {
-    public static HttpResponse<String> getArtistRequest(Integer id) throws IOException, InterruptedException, URISyntaxException {
-        HttpRequest req = HttpRequest
-                .newBuilder()
-                .uri(new URI("http://localhost:8080/chinook/artist?id=1"))
-                .GET()
-                .header("content-type", "application/json")
-                .build();
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> resp = client.send(req,
-                HttpResponse.BodyHandlers.ofString());
-        return resp;
-    }
+//    public static HttpResponse<String> getArtistRequest(Integer id) throws IOException, InterruptedException, URISyntaxException {
+//        HttpRequest req = HttpRequest
+//                .newBuilder()
+//                .uri(new URI("http://localhost:8080/chinook/artist?id=1"))
+//                .GET()
+//                .header("content-type", "application/json")
+//                .build();
+//        HttpClient client = HttpClient.newHttpClient();
+//        HttpResponse<String> resp = client.send(req,
+//                HttpResponse.BodyHandlers.ofString());
+//        return resp;
+//    }
 
     public static HttpResponse<String> postArtistRequest(String token) throws IOException, InterruptedException, URISyntaxException {
         HttpRequest req = HttpRequest
