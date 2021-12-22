@@ -27,7 +27,7 @@ public class DiscontinuedTrackController {
     @DeleteMapping(value = "/chinook/discontinuedtrack/delete")
     public ResponseEntity deleteDiscontinuedTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (authorizationService.isAuthorizedForAction(token, "chinook/discontinuedtrack/delete")) {
+        if (!authorizationService.isAuthorizedForAction(token, "/chinook/discontinuedtrack/delete")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         discontinuedTrackRepository.deleteById(id);
@@ -37,7 +37,7 @@ public class DiscontinuedTrackController {
     @PostMapping(value = "/chinook/discontinuedtrack/insert")
     public ResponseEntity insertDiscontinuedTrack(@RequestBody DiscontinuedTrack track, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (authorizationService.isAuthorizedForAction(token, "chinook/discontinuedtrack/insert")) {
+        if (!authorizationService.isAuthorizedForAction(token, "/chinook/discontinuedtrack/insert")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         discontinuedTrackRepository.save(track);

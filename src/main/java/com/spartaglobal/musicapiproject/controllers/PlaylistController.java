@@ -43,9 +43,7 @@ public class PlaylistController {
     @Autowired
     private InvoiceService is;
 
-
-
-
+    
     @GetMapping(value = "/chinook/playlist")
     public Playlist getTrack(@RequestParam Integer id) {
         Optional<Playlist> result = playlistRepo.findById(id);
