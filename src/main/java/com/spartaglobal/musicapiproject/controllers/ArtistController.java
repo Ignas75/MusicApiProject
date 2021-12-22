@@ -1,6 +1,7 @@
 package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.Artist;
+import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
 import com.spartaglobal.musicapiproject.repositories.ArtistRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@RestController
 public class ArtistController {
-
     @Autowired
     private ArtistRepository artistRepository;
+    @Autowired
+    private AlbumRepository albumRepository;
+    @Autowired
+    private AlbumController albumController;
     @Autowired
     private AuthorizationService as;
 
@@ -33,6 +38,7 @@ public class ArtistController {
         artistRepository.save(newArtist);
         return new ResponseEntity<>("Artist Created", HttpStatus.OK);
     }
+
 
     @PutMapping(value = "/chinook/artist/update")
     public ResponseEntity updateTrack(@RequestBody Artist newState, @RequestHeader("Authorization") String authTokenHeader){
