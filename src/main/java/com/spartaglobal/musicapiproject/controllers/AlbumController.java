@@ -10,6 +10,7 @@ import com.spartaglobal.musicapiproject.repositories.TrackRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,17 @@ public class AlbumController {
     @Autowired
     private CustomerController cc;
 
+    @RequestMapping(value = "/chinook/album/{id}",
+            method = RequestMethod.GET,
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    public Album getAlbum(@PathVariable Integer id) {
+        Optional<Album> result = albumRepository.findById(id);
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            return null;
+        }
+    }
 
     @GetMapping(value = "/chinook/album")
     public Album getTrack(@RequestParam Integer id) {
