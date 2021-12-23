@@ -26,20 +26,11 @@ public class DiscontinuedTrackController {
 
     // TODO: check if authentication would be advised to used here
     @GetMapping(value = "/chinook/discontinuedtrack")
-<<<<<<< HEAD
     public ResponseEntity<?> getDiscontinuedTrack(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             Optional<DiscontinuedTrack> result = discontinuedTrackRepository.findById(id);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-=======
-    public ResponseEntity<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
-        Optional<DiscontinuedTrack> result = discontinuedTrackRepository.findById(id);
-        if(result.isEmpty()){
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(result.get(), HttpStatus.OK);
->>>>>>> dev
     }
 
     @DeleteMapping(value = "/chinook/discontinuedtrack/delete")

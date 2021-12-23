@@ -28,10 +28,6 @@ public class AlbumController {
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
-    private InvoicelineRepository invoicelineRepository;
-    @Autowired
-    private PlaylisttrackRepository playlisttrackRepository;
-    @Autowired
     private AuthorizationService as;
     @Autowired
     private CustomerController cc;
