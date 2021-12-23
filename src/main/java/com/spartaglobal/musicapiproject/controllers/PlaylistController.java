@@ -103,7 +103,7 @@ public class PlaylistController {
         Token user = tokenRepository.getByAuthToken(token);
         Customer customer = customerRepository.getCustomerByEmail(user.getEmail());
         if (customer == null) {
-               return new ResponseEntity<>("{\"Customer not found\"}", HttpStatus.OK);
+            return new ResponseEntity<>("{\"Customer not found\"}", HttpStatus.OK);
         }
         /* Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
@@ -113,16 +113,18 @@ public class PlaylistController {
         List<Track> allTracks = new ArrayList<>();
         for (Playlisttrack t : allPlaylistTracks) {
             //check if track is discontinued
-                Track track = trackRepository.getById(t.getId().getTrackId());
-            if (discontinuedTrackRepository.findByTrackId(track) == null) {
-                //allTracks.add(trackRepository.getById(t.getId().getTrackId()));
+            Track track = trackRepository.getById(t.getId().getTrackId());
+            Optional<DiscontinuedTrack> dtr = discontinuedTrackRepository.findById(track.getId());
+            if (!(dtr.isEmpty()) && (dtr.get().getTrackId().getId() == track.getId())) {
+                System.out.println("Discontinued!");
+            } else {
                 allTracks.add(track);
             }
         }
         allTracks.remove(cc.getCustomerTracks(customer.getId()));
-        if(is.createInvoice(allTracks, customer)){
+        if (is.createInvoice(allTracks, customer)) {
             return new ResponseEntity<>("{\"message\":\"Playlist Purchase Complete\"}", headers, HttpStatus.OK);
         }
-        return new ResponseEntity<>("{\"message\":\"Customer already owns all tracks in the playlist\"}",headers, HttpStatus.OK);
+        return new ResponseEntity<>("{\"message\":\"Customer already owns all tracks in the playlist\"}", headers, HttpStatus.OK);
     }
 }
