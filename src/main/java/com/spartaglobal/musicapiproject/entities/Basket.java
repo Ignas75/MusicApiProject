@@ -1,22 +1,20 @@
 package com.spartaglobal.musicapiproject.entities;
 
-import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "basket")
 public class Basket {
-    @Id
-    @Column(name = "TrackId", nullable = false)
-    private Integer id;
+    @EmbeddedId
+    private BasketId id;
 
-    public Integer getId() {
+    public BasketId getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(BasketId id) {
         this.id = id;
     }
 }

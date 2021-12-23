@@ -1,24 +1,16 @@
 package com.spartaglobal.musicapiproject.controllers;
 
-import com.spartaglobal.musicapiproject.entities.Album;
-import com.spartaglobal.musicapiproject.entities.Basket;
-import com.spartaglobal.musicapiproject.entities.Playlist;
-import com.spartaglobal.musicapiproject.entities.Track;
-import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
-import com.spartaglobal.musicapiproject.repositories.BasketRepository;
-import com.spartaglobal.musicapiproject.repositories.PlaylistRepository;
-import com.spartaglobal.musicapiproject.repositories.TrackRepository;
+import com.spartaglobal.musicapiproject.entities.*;
+import com.spartaglobal.musicapiproject.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Optional;
-
+@RestController
 public class BasketController {
     @Autowired
     private AlbumRepository albumRepository;
@@ -28,54 +20,56 @@ public class BasketController {
     private PlaylistRepository playlistRepo;
     @Autowired
     private BasketRepository basketRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private DiscontinuedTrackRepository discontinuedTrackRepository;
 
-    //List<Track> tracksBasket = new ArrayList<>();
-    //List<Album> albumBasket = new ArrayList<>();
-    ///List<Playlist> playlistBasket = new ArrayList<>();
 
-    /*public BasketRepository addTracksBasket(Integer id){
-        for(Track track: trackRepository.findAll())
-            if(track.getId().equals(id))
-                basketRepository.save(track);
-        return basketRepository;
+    @PostMapping(value="/chinook/basket/add-track")
+    public ResponseEntity<String> addTrackToBasket(@RequestParam Integer trackId, @RequestParam Integer customerId ) {
+        Basket basket = new Basket();
+        Optional<Customer> findCustomer = customerRepository.findById(customerId);
+        Optional <Track> findTrack = trackRepository.findById(trackId);
+        Optional <DiscontinuedTrack> findDiscontinuedTrack = discontinuedTrackRepository.findById(trackId);
+        if (findCustomer.isPresent()){
+            System.out.println("cust present");
+            if (findTrack.isPresent()) {
+                System.out.println("hdu");
+                if (findDiscontinuedTrack.isEmpty()) {
+                    System.out.println("no discon");
+                    return new ResponseEntity<String>("Unsuccessful! In discounted Track so not available", HttpStatus.NOT_FOUND);
+                } else {
+                    BasketId basketid1 = new BasketId();
+                    basketid1.setTrackId(trackId);
+                    basketid1.setCustomerId(customerId);
+                    basket.setId(basketid1);
+                    basketRepository.save(basket);
+                    return new ResponseEntity<String>("Successful! Added to basket", HttpStatus.OK);
+                }
+            }else{
+                return new ResponseEntity<String>("Not a track", HttpStatus.NOT_FOUND);
+            }
+        }else{
+            return new ResponseEntity<String>("Not a customer", HttpStatus.NOT_FOUND);
+        }
     }
 
-     */
-
-    @PostMapping(value ="/chinook/basket/add")
-    public Basket addToDb(@RequestBody Basket b){
-        if(b.getId().equals(trackRepository.findById(b.getId())))  //checking to see if the id is in track repo
-            return basketRepository.save(b);
-        else return null;
+    @DeleteMapping(value="/chinook/basket/delete")
+    public ResponseEntity<String> deleteTrackFromBasket(@RequestParam Integer trackId, @RequestParam Integer customerId) {
+        Basket basket = new Basket();
+        BasketId nBasket = new BasketId();
+        nBasket.setTrackId(trackId);
+        nBasket.setCustomerId(customerId);
+        Optional<Basket> findBasket = basketRepository.findById(nBasket);
+        if(findBasket.isPresent()){
+            basket.setId(nBasket);
+            basketRepository.delete(basket); //the whole row
+            return new ResponseEntity<String>("Deleted",HttpStatus.OK);
+        }else{
+            return new ResponseEntity<String>("Customer not found with the given track ", HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PostMapping(value="//chinook/basket/add1")
-    public Basket insertSomethingInBasket(@RequestBody Basket b) {
-        return basketRepository.save(b);
-    }
-
-    @DeleteMapping(value="//chinook/basket/delete/{id}")
-    public void deleteTrack(@RequestParam Integer id) {
-        basketRepository.deleteById(id);
-    }
-
- /*   public List<Album> addAlbumBasket(Integer id){
-        for(Album a: albumRepository.findAll())
-            if(a.getId().equals(id))
-                albumBasket.add(a);
-        return albumBasket;
-    }
-
-    public List<Playlist> addPlaylistBasket(Integer id){
-        for(Playlist playlist: playlistRepo.findAll())
-            if(playlist.getId().equals(id))
-                playlistBasket.add(playlist);
-        return playlistBasket;
-    }
-
-    public List<>
-*/
-
-
-
+    
 }
