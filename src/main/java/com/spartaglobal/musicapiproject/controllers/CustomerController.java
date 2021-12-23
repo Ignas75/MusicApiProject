@@ -1,17 +1,17 @@
 package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.*;
-import com.spartaglobal.musicapiproject.repositories.*;
+import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
+import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
+import com.spartaglobal.musicapiproject.repositories.InvoiceRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -101,7 +101,7 @@ public class CustomerController {
     }
 
 
-    private Archiveinvoice genArchiveInvoice(Invoice invoice){
+    private Archiveinvoice genArchiveInvoice(Invoice invoice) {
         Archiveinvoice archiveinvoice = new Archiveinvoice();
         archiveinvoice.setFirstName(invoice.getCustomerId().getFirstName());
         archiveinvoice.setLastName(invoice.getCustomerId().getLastName());

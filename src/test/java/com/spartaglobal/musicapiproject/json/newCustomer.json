@@ -1,14 +1,14 @@
 {
-  "firstName" : "John",
-  "lastName" : "Doe",
-  "address" : "123 Fake Street",
-  "city" : "Fake City",
-  "state" : "FC",
-  "country" : "United Kingdom",
-  "postalCode" : "12345",
-  "phone" : "+44 123456789",
-  "email" : "example@gmail.com",
-  "supportRepId" : {
-    "id" : 3
+  "firstName": "John",
+  "lastName": "Doe",
+  "address": "123 Fake Street",
+  "city": "Fake City",
+  "state": "FC",
+  "country": "United Kingdom",
+  "postalCode": "12345",
+  "phone": "+44 123456789",
+  "email": "example@gmail.com",
+  "supportRepId": {
+    "id": 3
   }
 }

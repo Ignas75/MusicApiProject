@@ -36,8 +36,8 @@ public class InvoiceController {
     private AlbumController ac;
     @Autowired
     private BulkPurchaseDiscountRepository bulkPurchaseDiscountRepository;
-   @Autowired
-   private AuthorizationService authorizationService;
+    @Autowired
+    private AuthorizationService authorizationService;
 
     public boolean createInvoice(List<Track> tracks, Customer customer) {
         if (tracks.isEmpty()) {
@@ -87,8 +87,8 @@ public class InvoiceController {
 
     @DeleteMapping("/chinook/invoice/delete")
 
-    public ResponseEntity<String> deleteInvoice(@RequestHeader("Authorization") String authTokenHeader,@RequestParam Integer id, @RequestHeader("Accept") String contentType){
-        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+    public ResponseEntity<String> deleteInvoice(@RequestHeader("Authorization") String authTokenHeader, @RequestParam Integer id, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
             if (!authorizationService.isAuthorizedForAction(token, "chinook/invoice/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
