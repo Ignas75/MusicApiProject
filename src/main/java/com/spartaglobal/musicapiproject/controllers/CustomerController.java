@@ -66,7 +66,7 @@ public class CustomerController {
         return new ResponseEntity("Customer updated", HttpStatus.OK);
     }
 
-    // TODO: check if needs to have authentication to prevent customers accessing each other's tracks
+
     @GetMapping("/chinook/customer/tracks")
     public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
         Customer customer = customerRepository.getById(customerId);

@@ -7,7 +7,6 @@ import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,25 +29,19 @@ public class PlaylistController {
     @Autowired
     private TokenRepository tokenRepository;
     @Autowired
-    private PlaylistRepository playlistRepo;
+    private PlaylistRepository playlistRepository;
     @Autowired
-    private PlaylisttrackRepository playlistTrackRepo;
-
+    private InvoicelineRepository invoicelineRepository;
     @Autowired
     private AuthorizationService as = new AuthorizationService();
-
     @Autowired
     private CustomerController cc = new CustomerController();
-
     @Autowired
     private InvoiceService is;
 
-
-
-
     @GetMapping(value = "/chinook/playlist")
     public Playlist getTrack(@RequestParam Integer id) {
-        Optional<Playlist> result = playlistRepo.findById(id);
+        Optional<Playlist> result = playlistRepository.findById(id);
         if (result.isPresent()) {
             return result.get();
         } else {
@@ -59,31 +52,56 @@ public class PlaylistController {
     @Transactional
     @DeleteMapping(value = "/chinook/playlist/delete")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deletePlaylist(@RequestParam Integer id) {
-        playlistTrackRepo.deleteByIdPlaylistId(id);
-        playlistRepo.deleteById(id);
+    public ResponseEntity deletePlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
+        // Authorization
+        String token = authTokenHeader.split(" ")[1];
+        if (!as.isAuthorizedForAction(token, "/chinook/playlist/delete")) {
+            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
+        // Check playlist exists
+        Optional<Playlist> playlist = playlistRepository.findById(id);
+        if (playlist.isPresent()) {
+            // Check if playlist contains purchased tracks
+            boolean noPurchasedTracks = true;
+            List<Playlisttrack> playlistTracks = playlisttrackRepository.findAllByIdPlaylistId(id);
+            List<Track> tracks = new ArrayList<>();
+            for (Playlisttrack playlisttrack : playlistTracks) {
+                Track track = trackRepository.getById(playlisttrack.getId().getTrackId());
+                tracks.add(track);
+                List<Invoiceline> invoiceLines = invoicelineRepository.findAllByTrackId(track);
+                if (invoiceLines.size() > 0) {
+                    noPurchasedTracks = false;
+                    break;
+                }
+            }
+            if (noPurchasedTracks) {
+                for (Track track : tracks) {
+                    playlisttrackRepository.deleteByIdTrackId(track.getId());
+                    trackRepository.delete(track);
+                }
+                playlistRepository.delete(playlist.get());
+                return new ResponseEntity("Playlist deleted", HttpStatus.OK);
+            }
+            return new ResponseEntity("Cannot delete playlist containing purchased songs", HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity("Playlist does not exist", HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(value = "/chinook/playlist/add")
     public Playlisttrack addTrackToPlaylist(@Valid @RequestBody Playlisttrack playlisttrack) {
-        return playlistTrackRepo.save(playlisttrack);
-    }
-
-    @PostMapping(value = "/chinook/playlist/remove")
-    public Playlisttrack removeTrackFromPlaylist(@Valid @RequestBody Playlisttrack playlisttrack) {
-        return playlistTrackRepo.save(playlisttrack);
+        return playlisttrackRepository.save(playlisttrack);
     }
 
     @PostMapping(value = "/chinook/playlist/create")
     public Playlist addTrackToPlaylist(@Valid @RequestBody Playlist playlist) {
-        return playlistRepo.save(playlist);
+        return playlistRepository.save(playlist);
     }
 
     @PatchMapping(value = "/chinook/playlist/update")
     public Playlist updateAlbum(@Valid @RequestBody Playlist playlist1) {
-        Optional<Playlist> res = playlistRepo.findById(playlist1.getId());
+        Optional<Playlist> res = playlistRepository.findById(playlist1.getId());
         if (res.isPresent()) {
-            playlistRepo.save(playlist1);
+            playlistRepository.save(playlist1);
             return playlist1;
         } else {
             return null;
