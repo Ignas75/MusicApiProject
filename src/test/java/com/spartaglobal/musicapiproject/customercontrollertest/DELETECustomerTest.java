@@ -7,15 +7,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class DELETECustomerTest {
-        static CustomerAdd customerAdd;
+    static CustomerAdd customerAdd;
 
     @BeforeAll
-    public static void jsonConv(){
+    public static void jsonConv() {
         customerAdd = CustomerUtil.jsonConvDeleteCustomer("application/json");
     }
 
     @Test
-    public void customerDeletedTest(){
+    public void customerDeletedTest() {
         Assertions.assertTrue(customerAdd.getMessage().equals("Customer deleted"));
     }
 

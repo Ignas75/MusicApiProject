@@ -14,7 +14,7 @@ import java.nio.file.Path;
 
 public class CustomerUtil {
 
-    private static HttpResponse getCustomer(String contentType){
+    private static HttpResponse getCustomer(String contentType) {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/chinook/customer/"))
                 .header("content-type", contentType)
                 .header("Authorization", "Basic XJALyZSsaJnWWvGTqQQQ")
@@ -31,9 +31,9 @@ public class CustomerUtil {
     }
 
     //convert Json
-    public static CustomerAdd jsonConverter(String contentType){
+    public static CustomerAdd jsonConverter(String contentType) {
         HttpResponse<String> response = getCustomer(contentType);
-        if (response!=null){
+        if (response != null) {
             String json = response.body();
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -47,9 +47,7 @@ public class CustomerUtil {
     }
 
 
-
-
-    private static HttpResponse createCustomer(String contentType){
+    private static HttpResponse createCustomer(String contentType) {
         HttpRequest request = null;
         try {
             request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/chinook/customer/create"))
@@ -62,16 +60,16 @@ public class CustomerUtil {
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> response = null;
         try {
-            response = client.send(request,HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return response;
     }
 
-    public static CustomerAdd jsonConv(String contentType){
+    public static CustomerAdd jsonConv(String contentType) {
         HttpResponse<String> response = createCustomer(contentType);
-        if (response!=null){
+        if (response != null) {
             String json = response.body();
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -85,8 +83,7 @@ public class CustomerUtil {
     }
 
 
-
-    private static HttpResponse updateCustomer(String contentType){
+    private static HttpResponse updateCustomer(String contentType) {
         HttpRequest request = null;
         try {
             request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/chinook/customer/update"))
@@ -100,16 +97,16 @@ public class CustomerUtil {
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> response = null;
         try {
-            response = client.send(request,HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return response;
     }
 
-    public static CustomerAdd jsonConvUpdateCustomer(String contentType){
+    public static CustomerAdd jsonConvUpdateCustomer(String contentType) {
         HttpResponse<String> response = updateCustomer(contentType);
-        if (response!=null){
+        if (response != null) {
             String json = response.body();
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -123,9 +120,7 @@ public class CustomerUtil {
     }
 
 
-
-
-    private static HttpResponse deleteCustomer(String contentType){
+    private static HttpResponse deleteCustomer(String contentType) {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("http://localhost:8080/chinook/customer/delete"))
                 .header("content-type", contentType)
                 .DELETE()
@@ -135,16 +130,16 @@ public class CustomerUtil {
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse<String> response = null;
         try {
-            response = client.send(request,HttpResponse.BodyHandlers.ofString());
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return response;
     }
 
-    public static CustomerAdd jsonConvDeleteCustomer(String contentType){
-        HttpResponse<String> response =deleteCustomer(contentType);
-        if (response!=null){
+    public static CustomerAdd jsonConvDeleteCustomer(String contentType) {
+        HttpResponse<String> response = deleteCustomer(contentType);
+        if (response != null) {
             String json = response.body();
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -156,9 +151,6 @@ public class CustomerUtil {
         }
         return null;
     }
-
-
-
 
 
 }

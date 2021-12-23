@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +54,7 @@ public class ArtistController {
 
 
     @PutMapping(value = "/chinook/artist/update")
-    public ResponseEntity<String> updateTrack(@RequestBody Artist newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType){
+    public ResponseEntity<String> updateTrack(@RequestBody Artist newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
             if (as.isAuthorizedForAction(token, "chinook/artist/create")) {
