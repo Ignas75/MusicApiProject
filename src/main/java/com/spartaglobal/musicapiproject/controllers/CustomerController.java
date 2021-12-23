@@ -6,10 +6,12 @@ import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +29,6 @@ public class CustomerController {
     private AuthorizationService as;
     @Autowired
     private InvoiceService is;
-
 
     @PostMapping("/chinook/customer/create")
     public ResponseEntity<String> createCustomer(@RequestBody Customer newCustomer, @RequestHeader("Accept") String contentType) {
@@ -87,17 +88,6 @@ public class CustomerController {
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    public List<Track> getAllCustomerTracks(Integer customerId){
-        Customer customer = customerRepository.getById(customerId);
-        List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
-                .filter(s -> s.getCustomerId().equals(customer)).toList();
-        List<Track> customerTracks = new ArrayList<>();
-        for (int i = 0; i < customerInvoices.size(); i++) {
-            customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
-        }
-        return customerTracks;
-    }
-
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
         Album album = albumRepository.getById(albumId);
         Customer customer = customerRepository.getById(customerId);
@@ -122,6 +112,16 @@ public class CustomerController {
         return archiveinvoice;
     }
 
+    public List<Track> getAllCustomerTracks(Integer customerId) {
+        Customer customer = customerRepository.getById(customerId);
+        List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
+                .filter(s -> s.getCustomerId().equals(customer)).toList();
+        List<Track> customerTracks = new ArrayList<>();
+        for (int i = 0; i < customerInvoices.size(); i++) {
+            customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
+        }
+        return customerTracks;
+    }
 }
 
 

@@ -21,7 +21,6 @@ public class Employee {
 
     @Column(name = "Title", length = 30)
     private String title;
-
     @ManyToOne
     @JoinColumn(name = "ReportsTo")
     private Employee reportsTo;

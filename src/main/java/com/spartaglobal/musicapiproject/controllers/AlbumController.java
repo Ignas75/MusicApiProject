@@ -3,10 +3,7 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.Album;
 import com.spartaglobal.musicapiproject.entities.Customer;
 import com.spartaglobal.musicapiproject.entities.Track;
-import com.spartaglobal.musicapiproject.repositories.AlbumRepository;
-import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
-import com.spartaglobal.musicapiproject.repositories.TokenRepository;
-import com.spartaglobal.musicapiproject.repositories.TrackRepository;
+import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
@@ -15,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +27,10 @@ public class AlbumController {
     private TokenRepository tokenRepository;
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private InvoicelineRepository invoicelineRepository;
+    @Autowired
+    private PlaylisttrackRepository playlisttrackRepository;
     @Autowired
     private AuthorizationService as;
     @Autowired
@@ -52,6 +54,7 @@ public class AlbumController {
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
+    @Transactional
     @DeleteMapping(value = "/chinook/album/delete")
     public ResponseEntity<?> deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
@@ -88,6 +91,7 @@ public class AlbumController {
             albumRepository.save(newState);
             return new ResponseEntity<>("Album updated", HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+
     }
 
     @GetMapping("/chinook/album/tracks")
@@ -114,7 +118,7 @@ public class AlbumController {
             if (a == null) {
                 return new ResponseEntity<>("Track does not exist", HttpStatus.NO_CONTENT);
             }
-            List<Track> t = trackRepository.findByAlbumId(albumRepository.getById(id));
+            List<Track> t = trackRepository.findAllByAlbumId(albumRepository.getById(id));
             Customer c = customerRepository.findAll().stream().filter(s -> Objects.equals(s.getEmail(), customerEmail)).toList().get(0);
             t.remove(cc.getUserPurchasedTracksFromAlbum(c.getId(), id));
             if (is.createInvoice(t, c)) {
