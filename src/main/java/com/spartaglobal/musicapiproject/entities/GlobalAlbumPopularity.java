@@ -10,7 +10,7 @@ import javax.persistence.Table;
 @Entity
 @Immutable
 @Table(name = "globalalbumpopularity")
-public class GlobalAlbumPopularity{
+public class GlobalAlbumPopularity {
     @Id
     @Column(name = "Title", nullable = false, length = 160)
     private String title;

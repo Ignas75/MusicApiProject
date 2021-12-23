@@ -23,7 +23,7 @@ public class TrackControllerTest {
     // Customer, Staff, Admin, Invalid Id, Valid Id, Invalid token, Valid token
     @Test
     @DisplayName("Customer successfully buys track")
-    public void buyTrack() throws IOException, InterruptedException, URISyntaxException{
+    public void buyTrack() throws IOException, InterruptedException, URISyntaxException {
         HttpRequest req = HttpRequest
                 .newBuilder()
                 .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
@@ -40,7 +40,7 @@ public class TrackControllerTest {
 
     @Test
     @DisplayName("Invalid token when buying track")
-    public void buyTrackInvalidToken() throws IOException, InterruptedException, URISyntaxException{
+    public void buyTrackInvalidToken() throws IOException, InterruptedException, URISyntaxException {
         HttpRequest req = HttpRequest
                 .newBuilder()
                 .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
@@ -57,7 +57,7 @@ public class TrackControllerTest {
 
     @Test
     @DisplayName("Invalid token when buying track")
-    public void buyTrackAuthorized() throws IOException, InterruptedException, URISyntaxException{
+    public void buyTrackAuthorized() throws IOException, InterruptedException, URISyntaxException {
         HttpRequest req = HttpRequest
                 .newBuilder()
                 .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
@@ -75,7 +75,7 @@ public class TrackControllerTest {
     @ParameterizedTest
     @DisplayName("Invalid token when buying track")
     @ValueSource(strings = {"1YrKpXYZUZLlCTakT9MT"}) // admin and staff tokens
-    public void buyTrackUnauthorized() throws IOException, InterruptedException, URISyntaxException{
+    public void buyTrackUnauthorized() throws IOException, InterruptedException, URISyntaxException {
         HttpRequest req = HttpRequest
                 .newBuilder()
                 .uri(new URI("http://localhost:8080/chinook/track/buy?id=1"))
@@ -92,7 +92,7 @@ public class TrackControllerTest {
 
     @Test
     @DisplayName("GET request for track_id = 1")
-    public void getTrack(){
+    public void getTrack() {
         ObjectMapper mapper = new ObjectMapper();
         TrackPOJO track;
         try {

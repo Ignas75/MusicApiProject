@@ -32,18 +32,23 @@ public class AuthorizationService {
         );
      */
 
-    public boolean isAuthorizedForAction(String authToken, String endpoint){
-        if(tokenRepository.existsByAuthToken(authToken)){
+    public boolean isAuthorizedForAction(String authToken, String endpoint) {
+        if (tokenRepository.existsByAuthToken(authToken)) {
             Token token = tokenRepository.getByAuthToken(authToken);
             EndpointPermission permissions = endpointpermissionRepository.getByUrl(endpoint);
-            switch (token.getRoleID().getId()){
+            switch (token.getRoleID().getId()) {
                 case 1 -> {
                     if (permissions.getIsForAdmins()) return true;
-                } case 2 -> {
-                    if(permissions.getIsForStaff()) return true;
-                } case 3 -> {
+                }
+                case 2 -> {
+                    if (permissions.getIsForStaff()) return true;
+                }
+                case 3 -> {
                     if (permissions.getIsForCustomer()) return true;
-                }default -> {return false;}
+                }
+                default -> {
+                    return false;
+                }
             }
         }
         return false;
