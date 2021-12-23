@@ -64,15 +64,19 @@ VALUES
        ("/chinook/track/create",0,0,1),
        ("/chinook/track/update",0,0,1),
        ("/chinook/track/delete",0,0,1),
-       ("/chinook/customer/create",0,1,1),
-       ("/chinook/customer/update",0,1,1),
-       ("/chinook/customer/delete",0,1,1),
+       ("/chinook/customer/update",1,0,0),
+       ("/chinook/customer/delete",1,0,0),
        ("/chinook/artist/create",0,0,1),
        ("/chinook/artist/update",0,0,1),
        ("/chinook/artist/delete",0,0,1);
 
 
 INSERT INTO Roles VALUES (1, 'Admin'), (2, 'Sales'), (3, 'Customers');
+
+
+INSERT INTO e
+
+
 
 CREATE VIEW GlobalTrackPopularity AS
 SELECT t.Name, COUNT(il.TrackID) as "Popularity"
