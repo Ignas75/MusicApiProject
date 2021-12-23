@@ -133,7 +133,7 @@ public class AlbumController {
     }
 
     @GetMapping("/chinook/album/cost")
-    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId) {
+    public ResponseEntity<String> getAlbumCostWithDiscounts(@RequestParam Integer albumId) {
         Album album = albumRepository.getById(albumId);
         List<Track> albumTracks = trackRepository.findByAlbumId(album);
         BigDecimal totalCost = new BigDecimal(0);
@@ -153,7 +153,27 @@ public class AlbumController {
         totalCost = totalCost.multiply(BigDecimal.valueOf((maxDiscount.floatValue() / 100)));
         return new ResponseEntity<>(totalCost.toString(), HttpStatus.OK);
     }
-    
+
+    public BigDecimal getAlbumCostStandalone(Album albumId) {
+        Album album = albumRepository.getById(albumId.getId());
+        List<Track> albumTracks = trackRepository.findByAlbumId(album);
+        BigDecimal totalCost = new BigDecimal(0);
+        for (Track track : albumTracks) {
+            totalCost = totalCost.add(track.getUnitPrice());
+        }
+        ArrayList<AlbumDiscount> applicableAlbumDiscounts = (ArrayList<AlbumDiscount>) albumDiscountRepository.findAllById(List.of(album.getId())).stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<BulkPurchaseDiscount> applicableBulkPurchaseDiscounts = (ArrayList<BulkPurchaseDiscount>) bulkPurchaseDiscountRepository.findAll().stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<Integer> listOfDiscounts = new ArrayList<>();
+        for (AlbumDiscount applicableAlbumDiscount : applicableAlbumDiscounts) {
+            listOfDiscounts.add(applicableAlbumDiscount.getDiscount());
+        }
+        for (BulkPurchaseDiscount applicableBulkPurchaseDiscount : applicableBulkPurchaseDiscounts) {
+            listOfDiscounts.add(applicableBulkPurchaseDiscount.getDiscount());
+        }
+        Integer maxDiscount = max(listOfDiscounts);
+        totalCost = totalCost.multiply(BigDecimal.valueOf((maxDiscount.floatValue() / 100)));
+        return totalCost;
+    }
 }
 
 
