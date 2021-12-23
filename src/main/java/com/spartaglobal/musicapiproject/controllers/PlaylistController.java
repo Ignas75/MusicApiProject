@@ -34,14 +34,15 @@ public class PlaylistController {
     @Autowired
     private InvoicelineRepository invoicelineRepository;
     @Autowired
-    private AuthorizationService as = new AuthorizationService();
+    private AuthorizationService as;
     @Autowired
-    private CustomerController cc = new CustomerController();
+    private CustomerController cc;
     @Autowired
     private InvoiceService is;
 
+
     @GetMapping(value = "/chinook/playlist")
-    public ResponseEntity<?> getTrack(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
+    public ResponseEntity<?> getPlaylist(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             Optional<Playlist> result = playlistRepository.findById(id);
             if (result.isPresent()) {
@@ -55,7 +56,7 @@ public class PlaylistController {
     @Transactional
     @DeleteMapping(value = "/chinook/playlist/delete")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public ResponseEntity deletePlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
+    public ResponseEntity<String> deletePlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         // Authorization
         String token = authTokenHeader.split(" ")[1];
         if (!as.isAuthorizedForAction(token, "/chinook/playlist/delete")) {
@@ -83,11 +84,11 @@ public class PlaylistController {
                     trackRepository.delete(track);
                 }
                 playlistRepository.delete(playlist.get());
-                return new ResponseEntity("Playlist deleted", HttpStatus.OK);
+                return new ResponseEntity<>("Playlist deleted", HttpStatus.OK);
             }
-            return new ResponseEntity("Cannot delete playlist containing purchased songs", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Cannot delete playlist containing purchased songs", HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity("Playlist does not exist", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Playlist does not exist", HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(value = "/chinook/playlist/add")
@@ -124,7 +125,6 @@ public class PlaylistController {
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-
     @PostMapping(value = "chinook/playlist/buy")
     public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken) {
         String token = authToken.split(" ")[1];
@@ -148,6 +148,7 @@ public class PlaylistController {
         for (Playlisttrack t : allPlaylistTracks) {
             allTracks.add(trackRepository.getById(t.getId().getTrackId()));
         }
+
         allTracks.remove(cc.getAllCustomerTracks(customer.getId()));
         if (is.createInvoice(allTracks, customer)) {
             return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);

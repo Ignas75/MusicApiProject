@@ -29,8 +29,6 @@ public class InvoiceController {
     @Autowired
     private TrackRepository trackRepository;
     @Autowired
-    private AlbumRepository albumRepository;
-    @Autowired
     private AlbumDiscountRepository albumDiscountRepository;
     @Autowired
     private AlbumController ac;

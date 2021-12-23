@@ -22,6 +22,7 @@ import static java.util.Collections.max;
 
 @RestController
 public class AlbumController {
+    @Autowired
     AlbumDiscountRepository albumDiscountRepository;
     @Autowired
     BulkPurchaseDiscountRepository bulkPurchaseDiscountRepository;
@@ -39,17 +40,11 @@ public class AlbumController {
     private CustomerController cc;
     @Autowired
     private InvoiceService is;
-
-    @GetMapping(value = "/chinook/album/{id}")
-    public ResponseEntity<?> getAlbum(@PathVariable Integer id, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType) != null) {
-            Optional<Album> result = albumRepository.findById(id);
-            return new ResponseEntity<>(result.orElse(null), HttpStatus.OK);
-        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-    }
+    @Autowired
+    private InvoicelineRepository invoicelineRepository;
 
     @GetMapping(value = "/chinook/album")
-    public ResponseEntity<?> getTrack(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
+    public ResponseEntity<?> getAlbum(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             Optional<Album> result = albumRepository.findById(id);
             return new ResponseEntity<>(result.orElse(null), HttpStatus.OK);
@@ -58,23 +53,38 @@ public class AlbumController {
 
     @Transactional
     @DeleteMapping(value = "/chinook/album/delete")
-    public ResponseEntity<?> deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
+    public ResponseEntity<?> deleteAlbum(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/album/delete")) {
+            if (!as.isAuthorizedForAction(token, "/chinook/album/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
-
+            // Check album exists
+            Optional<Album> album = albumRepository.findById(id);
+            if (album.isPresent()) {
+                // Check if album contains any purchase songs
+                boolean noPurchasedTracks = true;
+                List<Track> albumTracks = trackRepository.findAllByAlbumId(album.get());
+                for (Track track : albumTracks) {
+                    List<Invoiceline> invoiceLines = invoicelineRepository.findAllByTrackId(track);
+                    if (invoiceLines.size() > 0) {
+                        noPurchasedTracks = false;
+                        break;
+                    }
+                }
+            }
             trackRepository.delete(trackRepository.getById(id));
             return new ResponseEntity<>("Album deleted", HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
+
+
     @PostMapping("/chinook/album/create")
     public ResponseEntity<?> createAlbum(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Album newAlbum, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/album/create")) {
+            if (!as.isAuthorizedForAction(token, "/chinook/album/create")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             albumRepository.save(newAlbum);
@@ -87,7 +97,7 @@ public class AlbumController {
     public ResponseEntity<?> updateAlbum(@RequestBody Album newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/album/update")) {
+            if (!as.isAuthorizedForAction(token, "/chinook/album/update")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             Optional<Album> oldState = albumRepository.findById(newState.getId());
@@ -105,11 +115,12 @@ public class AlbumController {
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
+    //is this one not supposed to have the !
     @PostMapping("/chinook/album/buy")
     public ResponseEntity<?> buyAlbum(@RequestParam Integer id, @RequestBody String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/track/buy")) {
+            if (!as.isAuthorizedForAction(token, "/chinook/track/buy")) {
                 return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
             }
             String customerEmail;

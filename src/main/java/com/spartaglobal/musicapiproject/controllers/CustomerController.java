@@ -47,12 +47,11 @@ public class CustomerController {
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-
     @PutMapping("/chinook/customer/update")
     public ResponseEntity<String> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+            if (!as.isAuthorizedForAction(token, "/chinook/customer/create")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             Optional<Customer> oldState = customerRepository.findById(newState.getId());
@@ -62,12 +61,11 @@ public class CustomerController {
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-
     @DeleteMapping("/chinook/customer/delete")
     public ResponseEntity<String> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+            if (!as.isAuthorizedForAction(token, "/chinook/customer/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             customerRepository.delete(customerRepository.getById(id));
@@ -99,19 +97,6 @@ public class CustomerController {
             customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
         }
         return customerTracks.stream().filter(s -> s.getAlbumId().equals(album)).toList();
-    }
-
-
-    private Archiveinvoice genArchiveInvoice(Invoice invoice) {
-        Archiveinvoice archiveinvoice = new Archiveinvoice();
-        archiveinvoice.setFirstName(invoice.getCustomerId().getFirstName());
-        archiveinvoice.setLastName(invoice.getCustomerId().getLastName());
-        archiveinvoice.setEmailAddress(invoice.getCustomerId().getEmail());
-        archiveinvoice.setAddress(invoice.getBillingAddress() + " " + invoice.getBillingCity() + " " + invoice.getBillingState() + " " + invoice.getBillingCountry());
-        archiveinvoice.setPostalCode(invoice.getBillingPostalCode());
-        archiveinvoice.setInvoiceDate(invoice.getInvoiceDate());
-        archiveinvoice.setTotal(invoice.getTotal());
-        return archiveinvoice;
     }
 
     public List<Track> getAllCustomerTracks(Integer customerId) {
