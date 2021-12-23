@@ -21,8 +21,8 @@ public class InvoiceService {
     @Autowired
     private InvoicelineRepository invoiceLineRepository;
 
-    public boolean createInvoice(List<Track> tracks, Customer customer){
-        if(tracks.isEmpty()){
+    public boolean createInvoice(List<Track> tracks, Customer customer) {
+        if (tracks.isEmpty()) {
             return false;
         }
         Invoice newInvoice = new Invoice();
@@ -49,7 +49,7 @@ public class InvoiceService {
         return true;
     }
 
-    private Invoiceline createInvoiceLine(Invoice invoice, Track track){
+    private Invoiceline createInvoiceLine(Invoice invoice, Track track) {
         Invoiceline invoiceLine = new Invoiceline();
         invoiceLine.setInvoiceId(invoice);
         invoiceLine.setQuantity(1);
@@ -58,10 +58,10 @@ public class InvoiceService {
         return invoiceLine;
     }
 
-    public List<Track> getTracksFromInvoice(Invoice invoice){
+    public List<Track> getTracksFromInvoice(Invoice invoice) {
         List<Track> tracks = new java.util.ArrayList<>();
         List<Invoiceline> invoiceLines = invoiceLineRepository.findAll()
-                .stream().filter(s->s.getInvoiceId().equals(invoice.getId())).toList();
+                .stream().filter(s -> s.getInvoiceId().equals(invoice.getId())).toList();
         for (Invoiceline invoiceLine : invoiceLines) {
             tracks.add(invoiceLine.getTrackId());
         }

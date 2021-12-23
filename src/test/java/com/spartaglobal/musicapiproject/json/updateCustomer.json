@@ -1,7 +1,7 @@
 {
-  "address" : "123 Another Fake Street",
-  "city" : "Fake City",
-  "state" : "FC",
-  "country" : "United Kingdom",
-  "postalCode" : "54321"
+  "address": "123 Another Fake Street",
+  "city": "Fake City",
+  "state": "FC",
+  "country": "United Kingdom",
+  "postalCode": "54321"
 }

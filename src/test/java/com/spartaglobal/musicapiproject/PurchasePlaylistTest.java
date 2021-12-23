@@ -5,10 +5,9 @@ import org.junit.jupiter.api.Test;
 public class PurchasePlaylistTest {
 
     @Test
-    public void createNewCustomer(){
+    public void createNewCustomer() {
 
     }
-
 
 
 }
