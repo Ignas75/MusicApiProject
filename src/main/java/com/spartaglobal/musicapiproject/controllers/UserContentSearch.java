@@ -3,9 +3,14 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /*
 This class contains one function that acts like a search engine
@@ -20,6 +25,7 @@ streams and matchers for faster results.
 
 @RestController
 public class UserContentSearch {
+    Set<UserSearchable> searchSet = new HashSet<>();
     @Autowired
     private AlbumRepository albumRepository;
     @Autowired
@@ -30,8 +36,6 @@ public class UserContentSearch {
     private PlaylistRepository playlistRepository;
     @Autowired
     private TrackRepository trackRepository;
-
-    Set<UserSearchable> searchSet = new HashSet<>();
 
     @GetMapping(value = "/chinook/search/track")
     public Optional<Track> getTrack(@RequestParam Integer id) {

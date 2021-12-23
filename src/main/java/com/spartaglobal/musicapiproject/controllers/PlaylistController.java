@@ -109,10 +109,10 @@ public class PlaylistController {
     }
 
     @PostMapping(value = "chinook/playlist/buy")
-    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String dataFormat ) {
+    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String dataFormat) {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
-        if (dataFormat.equals("application/json")){
+        if (dataFormat.equals("application/json")) {
             headers.add("content-type", "application/json");
         }
         headers.add("content-type", "application/xml");
@@ -135,7 +135,7 @@ public class PlaylistController {
             allTracks.add(trackRepository.getById(t.getId().getTrackId()));
         }
         allTracks.remove(cc.getCustomerTracks(customer.getId()));
-        if(is.createInvoice(allTracks, customer)){
+        if (is.createInvoice(allTracks, customer)) {
             return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
         }
         return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);

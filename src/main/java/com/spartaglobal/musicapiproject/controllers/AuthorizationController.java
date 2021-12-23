@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.Random;
@@ -37,7 +40,7 @@ public class AuthorizationController {
 
 
     @GetMapping("/chinook/token/create")
-    public ResponseEntity<String> generateNewAuthToken(@RequestParam String emailAddress){
+    public ResponseEntity<String> generateNewAuthToken(@RequestParam String emailAddress) {
         StringBuilder sb = new StringBuilder();
         Random rng = new Random();
         HttpHeaders headers = new HttpHeaders();
@@ -48,23 +51,23 @@ public class AuthorizationController {
                 .map(Token::getAuthToken)
                 .collect(Collectors.toSet());
         boolean generatedUniqueToken = false;
-        while (!generatedUniqueToken){
-            for (int i = 0 ; i < 20 ; i++){
+        while (!generatedUniqueToken) {
+            for (int i = 0; i < 20; i++) {
                 sb.append(validCharset.charAt(rng.nextInt(0, validCharset.length())));
             }
-            if (!allExistingTokenStrings.contains(sb.toString())){
+            if (!allExistingTokenStrings.contains(sb.toString())) {
                 generatedUniqueToken = true;
             }
         }
         Role role;
-        if (employeeRepository.existsByEmail(emailAddress)){
+        if (employeeRepository.existsByEmail(emailAddress)) {
             Employee employee = employeeRepository.findByEmail(emailAddress);
-            if (employee.getTitle().contains("General Manager") || employee.getTitle().contains("IT")){
+            if (employee.getTitle().contains("General Manager") || employee.getTitle().contains("IT")) {
                 role = new Role(1);
             } else role = new Role(2);
-        } else if (customerRepository.existsByEmail(emailAddress)){
+        } else if (customerRepository.existsByEmail(emailAddress)) {
             role = new Role(3);
-        } else{
+        } else {
             return new ResponseEntity<>("{\"message\": \"email address not registered\"}", headers, HttpStatus.NOT_FOUND);
         }
         Token newToken = new Token(
@@ -73,21 +76,21 @@ public class AuthorizationController {
                 role,
                 LocalDate.now()
         );
-        if (tokenRepository.existsByEmail(emailAddress)){
+        if (tokenRepository.existsByEmail(emailAddress)) {
             Token token = tokenRepository.getByEmail(emailAddress);
             token.setAuthToken(sb.toString());
             tokenRepository.save(token);
-        }else {
+        } else {
             tokenRepository.save(newToken);
         }
         return new ResponseEntity<>("{\n\"email\": " + "\"" + emailAddress + "\",\n" + "\"token\": " + "\"" + sb + "\"\n}", headers, HttpStatus.OK);
     }
 
     @DeleteMapping("/chinook/token/delete")
-    public ResponseEntity<String> clearExistingAuthToken(@RequestParam String emailAddress){
+    public ResponseEntity<String> clearExistingAuthToken(@RequestParam String emailAddress) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-        if(tokenRepository.existsByEmail(emailAddress)){
+        if (tokenRepository.existsByEmail(emailAddress)) {
             tokenRepository.delete(tokenRepository.getByEmail(emailAddress));
             return new ResponseEntity<>("{\"message\": \"Token cleared. You will need a new token to use the services again.\"}", headers, HttpStatus.OK);
         } else {
