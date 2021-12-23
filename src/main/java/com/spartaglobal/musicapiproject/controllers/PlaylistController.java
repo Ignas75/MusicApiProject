@@ -41,7 +41,7 @@ public class PlaylistController {
 
 
     @GetMapping(value = "/chinook/playlist")
-    public Playlist getTrack(@RequestParam Integer id) {
+    public Playlist getPlaylist(@RequestParam Integer id) {
         Optional<Playlist> result = playlistRepository.findById(id);
         if (result.isPresent()) {
             return result.get();
@@ -94,12 +94,12 @@ public class PlaylistController {
     }
 
     @PostMapping(value = "/chinook/playlist/create")
-    public Playlist addTrackToPlaylist(@Valid @RequestBody Playlist playlist) {
+    public Playlist addPlaylist(@Valid @RequestBody Playlist playlist) {
         return playlistRepository.save(playlist);
     }
 
     @PatchMapping(value = "/chinook/playlist/update")
-    public Playlist updateAlbum(@Valid @RequestBody Playlist playlist1) {
+    public Playlist updatePlaylist(@Valid @RequestBody Playlist playlist1) {
         Optional<Playlist> res = playlistRepository.findById(playlist1.getId());
         if (res.isPresent()) {
             playlistRepository.save(playlist1);
@@ -109,8 +109,8 @@ public class PlaylistController {
         }
     }
 
-    @PostMapping(value = "chinook/playlist/buy")
-    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String dataFormat ) {
+    @PostMapping(value = "/chinook/playlist/buy")
+    public ResponseEntity<String> buyPlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String dataFormat ) {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
         if (dataFormat.equals("application/json")){
@@ -128,7 +128,7 @@ public class PlaylistController {
         /* Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
                 .stream()
-                .filter(s -> Objects.equals(s.getId().getPlaylistId(), playListId))
+                .filter(s -> Objects.equals(s.getId().getPlaylistId(), id))
                 .toList();
 
         List<Track> allTracks = new ArrayList<>();
@@ -137,7 +137,7 @@ public class PlaylistController {
         }
         allTracks.remove(cc.getCustomerTracks(customer.getId()));
         if(is.createInvoice(allTracks, customer)){
-            return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
+            return new ResponseEntity<>("Invoice(s) created", HttpStatus.OK);
         }
         return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);
     }

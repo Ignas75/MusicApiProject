@@ -1,7 +1,7 @@
 package com.spartaglobal.musicapiproject;
 
 import com.spartaglobal.musicapiproject.pojo.TrackPOJO;
-import com.spartaglobal.musicapiproject.requests.RequestBuilder;
+import com.spartaglobal.musicapiproject.requests.RequestFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -19,10 +19,10 @@ public class TrackControllerTest {
 
     @BeforeAll
     public static void trackRequests() throws IOException, InterruptedException, URISyntaxException{
-        track = RequestBuilder.getTrackRequest(1);
-        postTrack= RequestBuilder.postTrackRequest("ihKc6Ot7BE9MtptdVG5e");
-        putTrack = RequestBuilder.putTrackRequest("ihKc6Ot7BE9MtptdVG5e");
-        buyTrack = RequestBuilder.buyTrackRequest(1, "JJVXUgNu6zoGeeyZsYa1");
+        track = RequestFactory.getTrackRequest(1);
+        postTrack= RequestFactory.postTrackRequest("ihKc6Ot7BE9MtptdVG5e");
+        putTrack = RequestFactory.putTrackRequest("ihKc6Ot7BE9MtptdVG5e");
+        buyTrack = RequestFactory.buyTrackRequest(1, "JJVXUgNu6zoGeeyZsYa1");
     }
 
     // Customer, Staff, Admin, Invalid Id, Valid Id, Invalid token, Valid token
