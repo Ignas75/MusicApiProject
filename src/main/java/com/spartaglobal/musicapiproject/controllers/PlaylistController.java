@@ -112,7 +112,12 @@ public class PlaylistController {
                 .toList();
         List<Track> allTracks = new ArrayList<>();
         for (Playlisttrack t : allPlaylistTracks) {
-            allTracks.add(trackRepository.getById(t.getId().getTrackId()));
+            //check if track is discontinued
+                Track track = trackRepository.getById(t.getId().getTrackId());
+            if (discontinuedTrackRepository.findByTrackId(track) == null) {
+                //allTracks.add(trackRepository.getById(t.getId().getTrackId()));
+                allTracks.add(track);
+            }
         }
         allTracks.remove(cc.getCustomerTracks(customer.getId()));
         if(is.createInvoice(allTracks, customer)){
