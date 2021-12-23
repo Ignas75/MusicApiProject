@@ -42,7 +42,7 @@ public class AlbumController {
     @RequestMapping(value = "/chinook/album/{id}",
             method = RequestMethod.GET,
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public Album getAlbum(@PathVariable Integer id) {
+    public Album getAlbumTest(@PathVariable Integer id) {
         Optional<Album> result = albumRepository.findById(id);
         if (result.isPresent()) {
             return result.get();
@@ -52,14 +52,14 @@ public class AlbumController {
     }
 
     @GetMapping(value = "/chinook/album")
-    public Album getTrack(@RequestParam Integer id) {
+    public Album getAlbum(@RequestParam Integer id) {
         Optional<Album> result = albumRepository.findById(id);
         return result.orElse(null);
     }
 
     @Transactional
     @DeleteMapping(value = "/chinook/album/delete")
-    public ResponseEntity deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
+    public ResponseEntity deleteAlbum(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         // Authorization
         String token = authTokenHeader.split(" ")[1];
         if (!as.isAuthorizedForAction(token, "/chinook/album/delete")) {
@@ -111,7 +111,7 @@ public class AlbumController {
         Optional<Album> oldState = albumRepository.findById(newState.getId());
         if (oldState.isEmpty()) return null;
         albumRepository.save(newState);
-        return new ResponseEntity("Album updated", HttpStatus.OK);
+        return new ResponseEntity(newState, HttpStatus.OK);
     }
 
     @GetMapping("/chinook/album/tracks")
@@ -119,6 +119,7 @@ public class AlbumController {
         return trackRepository.findAll().stream().filter(s -> s.getAlbumId().getId().equals(albumId)).toList();
     }
 
+    //is this one not supposed to have the !
     @PostMapping("/chinook/album/buy")
     public ResponseEntity buyAlbum(@RequestParam Integer id, @RequestBody String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];

@@ -1,6 +1,7 @@
 package com.spartaglobal.musicapiproject.requests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spartaglobal.musicapiproject.pojo.AlbumId;
 import com.spartaglobal.musicapiproject.pojo.ArtistId;
 import com.spartaglobal.musicapiproject.pojo.PlaylistPOJO;
 import com.spartaglobal.musicapiproject.pojo.TrackPOJO;
@@ -75,7 +76,12 @@ public class RequestFactory {
         return playlist;
     }
 
-    // Track requests
+    private static AlbumId albumMapper(HttpResponse<String> resp) throws JsonProcessingException {
+        AlbumId album = mapper.readValue(resp.body(), AlbumId.class);
+        return album;
+    }
+
+    // Tracks
     public static TrackPOJO getTrackRequest(Integer id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> resp = responseBuilder("/chinook/track/read", id, null, "GET",
                 null);
@@ -101,7 +107,7 @@ public class RequestFactory {
         return resp.body();
     }
 
-    // Artist requests
+    // Artist
     public static ArtistId getArtistRequest(Integer id) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> resp = responseBuilder("/chinook/artist", id, null, "GET",
                 null);
@@ -139,5 +145,27 @@ public class RequestFactory {
     public static String buyPlaylist(Integer id, String token) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> resp = responseBuilder("/chinook/playlist/buy", id, token, "POST", null);
         return resp.body();
+    }
+
+    // Album
+    public static AlbumId getAlbumId(Integer id) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> resp = responseBuilder("/chinook/album", id, null, "GET", null);
+        return albumMapper(resp);
+    }
+
+    public static AlbumId createAlbumRequest(String token) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> resp = responseBuilder("/chinook/album/create", null, token, "POST", "album.json");
+        return albumMapper(resp);
+    }
+
+    public static String deleteAlbum(Integer id, String token) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> resp = responseBuilder("/chinook/album/delete", id, token, "DELETE", null);
+        return resp.body();
+    }
+
+    public static AlbumId updateAlbum(String token) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> resp = responseBuilder("/chinook/album/update", null, token, "PUT",
+                "updateAlbum.json");
+        return albumMapper(resp);
     }
 }
