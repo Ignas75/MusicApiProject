@@ -3,11 +3,11 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,17 +43,16 @@ public class PlaylistController {
     @Autowired
     private InvoiceService is;
 
-
-
-
     @GetMapping(value = "/chinook/playlist")
-    public Playlist getTrack(@RequestParam Integer id) {
-        Optional<Playlist> result = playlistRepo.findById(id);
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            return null;
-        }
+    public ResponseEntity<?> getTrack(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            Optional<Playlist> result = playlistRepo.findById(id);
+            if (result.isPresent()) {
+                return new ResponseEntity<>(result.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Playlist not Found", HttpStatus.NOT_FOUND);
+            }
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @Transactional
@@ -65,29 +64,37 @@ public class PlaylistController {
     }
 
     @PostMapping(value = "/chinook/playlist/add")
-    public Playlisttrack addTrackToPlaylist(@Valid @RequestBody Playlisttrack playlisttrack) {
-        return playlistTrackRepo.save(playlisttrack);
+    public ResponseEntity<?> addTrackToPlaylist(@Valid @RequestBody Playlisttrack playlisttrack, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            return new ResponseEntity<>(playlistTrackRepo.save(playlisttrack), HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PostMapping(value = "/chinook/playlist/remove")
-    public Playlisttrack removeTrackFromPlaylist(@Valid @RequestBody Playlisttrack playlisttrack) {
-        return playlistTrackRepo.save(playlisttrack);
+    public ResponseEntity<?> removeTrackFromPlaylist(@Valid @RequestBody Playlisttrack playlisttrack, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            return new ResponseEntity<>(playlistTrackRepo.save(playlisttrack), HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PostMapping(value = "/chinook/playlist/create")
-    public Playlist addTrackToPlaylist(@Valid @RequestBody Playlist playlist) {
-        return playlistRepo.save(playlist);
+    public ResponseEntity<?> addTrackToPlaylist(@Valid @RequestBody Playlist playlist, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            return new ResponseEntity<>(playlistRepo.save(playlist), HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PatchMapping(value = "/chinook/playlist/update")
-    public Playlist updateAlbum(@Valid @RequestBody Playlist playlist1) {
-        Optional<Playlist> res = playlistRepo.findById(playlist1.getId());
-        if (res.isPresent()) {
-            playlistRepo.save(playlist1);
-            return playlist1;
-        } else {
-            return null;
-        }
+    public ResponseEntity<?> updateAlbum(@Valid @RequestBody Playlist playlist1, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            Optional<Playlist> res = playlistRepo.findById(playlist1.getId());
+            if (res.isPresent()) {
+                playlistRepo.save(playlist1);
+                return new ResponseEntity<>(playlist1, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Playlist Not Found", HttpStatus.NOT_FOUND);
+            }
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PostMapping(value = "chinook/playlist/buy")
@@ -116,7 +123,7 @@ public class PlaylistController {
         for (Playlisttrack t : allPlaylistTracks) {
             allTracks.add(trackRepository.getById(t.getId().getTrackId()));
         }
-        allTracks.remove(cc.getCustomerTracks(customer.getId()));
+        allTracks.remove(cc.getAllCustomerTracks(customer.getId()));
         if(is.createInvoice(allTracks, customer)){
             return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
         }

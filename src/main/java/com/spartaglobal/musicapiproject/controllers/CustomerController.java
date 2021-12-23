@@ -3,6 +3,7 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,56 +24,70 @@ public class CustomerController {
     @Autowired
     private InvoiceRepository invoiceRepository;
     @Autowired
-    private InvoicelineRepository invoicelineRepository;
-    @Autowired
-    private ArchiveinvoiceRepository archiveinvoiceRepository;
-    @Autowired
-    private TokenRepository tokenRepository;
-    @Autowired
     private AuthorizationService as;
     @Autowired
     private InvoiceService is;
 
 
     @PostMapping("/chinook/customer/create")
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
-        customerRepository.save(newCustomer);
-        return new ResponseEntity("Customer Created", HttpStatus.OK);
+    public ResponseEntity<String> createCustomer(@RequestBody Customer newCustomer, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            customerRepository.save(newCustomer);
+            return new ResponseEntity<>("Customer Created", HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @GetMapping("/chinook/customer")
-    public ResponseEntity<Customer> readCustomer(@RequestParam Integer id) {
-        Customer customer = customerRepository.getById(id);
-        return new ResponseEntity(customer, HttpStatus.OK);
+    public ResponseEntity<?> readCustomer(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            Customer customer = customerRepository.getById(id);
+            return new ResponseEntity<>(customer, HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
 
     @PutMapping("/chinook/customer/update")
-    public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
-        String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        Optional<Customer> oldState = customerRepository.findById(newState.getId());
-        if (oldState.isEmpty()) return null;
-        customerRepository.save(newState);
-        return new ResponseEntity("Customer updated", HttpStatus.OK);
+    public ResponseEntity<String> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            String token = authTokenHeader.split(" ")[1];
+            if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
+                return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+            }
+            Optional<Customer> oldState = customerRepository.findById(newState.getId());
+            if (oldState.isEmpty()) return null;
+            customerRepository.save(newState);
+            return new ResponseEntity<>("Customer updated", HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
 
     @DeleteMapping("/chinook/customer/delete")
-    public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
-        String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
-
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        customerRepository.delete(customerRepository.getById(id));
-        return new ResponseEntity("Customer deleted", HttpStatus.OK);
+    public ResponseEntity<String> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            String token = authTokenHeader.split(" ")[1];
+            if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+                return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+            }
+            customerRepository.delete(customerRepository.getById(id));
+            return new ResponseEntity<>("Customer deleted", HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @GetMapping("/chinook/customer/tracks")
-    public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
+    public ResponseEntity<?> getCustomerTracks(@RequestParam Integer customerId, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            Customer customer = customerRepository.getById(customerId);
+            List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
+                    .filter(s -> s.getCustomerId().equals(customer)).toList();
+            List<Track> customerTracks = new ArrayList<>();
+            for (int i = 0; i < customerInvoices.size(); i++) {
+                customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
+            }
+            return new ResponseEntity<>(customerTracks, HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    public List<Track> getAllCustomerTracks(Integer customerId){
         Customer customer = customerRepository.getById(customerId);
         List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
                 .filter(s -> s.getCustomerId().equals(customer)).toList();
@@ -83,36 +98,17 @@ public class CustomerController {
         return customerTracks;
     }
 
-
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
         Album album = albumRepository.getById(albumId);
-        List<Track> customerTracks = getCustomerTracks(customerId);
+        Customer customer = customerRepository.getById(customerId);
+        List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
+                .filter(s -> s.getCustomerId().equals(customer)).toList();
+        List<Track> customerTracks = new ArrayList<>();
+        for (int i = 0; i < customerInvoices.size(); i++) {
+            customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
+        }
         return customerTracks.stream().filter(s -> s.getAlbumId().equals(album)).toList();
     }
-
-
-    @DeleteMapping("chinook/customer/delete")
-    public ResponseEntity<Customer> deleteCustomer(@RequestHeader("Authorization") String authTokenHeader) {
-        String token = authTokenHeader.split(" ")[1];
-        if (!as.isAuthorizedForAction(token, "chinook/customer/delete")) {
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        Token tk = tokenRepository.getByAuthToken(token);
-        Customer customer  = customerRepository.getCustomerByEmail(tk.getEmail());
-
-        //find all the invoices for that customer
-        List<Invoice> invoices = invoiceRepository.findAllByCustomerId(customer);
-
-        for (Invoice i : invoices){
-            archiveinvoiceRepository.save(genArchiveInvoice(i));
-            List<Invoiceline> invoicelines = invoicelineRepository.findAllByInvoiceId(i);
-            invoicelineRepository.deleteAllInBatch(invoicelines);
-        }
-        invoiceRepository.deleteAllInBatch(invoices);
-        customerRepository.delete(customer);
-        return new ResponseEntity("Customer deleted", HttpStatus.OK);
-    }
-
 
     private Archiveinvoice genArchiveInvoice(Invoice invoice){
         Archiveinvoice archiveinvoice = new Archiveinvoice();

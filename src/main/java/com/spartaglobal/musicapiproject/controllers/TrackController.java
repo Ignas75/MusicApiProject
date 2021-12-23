@@ -6,6 +6,7 @@ import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
 import com.spartaglobal.musicapiproject.repositories.TokenRepository;
 import com.spartaglobal.musicapiproject.repositories.TrackRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class TrackController {
     private InvoiceService is;
     
     @GetMapping("/chinook/track/buy")
-    public ResponseEntity buyTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
+    public ResponseEntity<String> buyTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
         // Valid token check
         String customerEmail;
@@ -52,8 +53,8 @@ public class TrackController {
         }
         // Find customer
         Customer c = customerRepository.findAll().stream().filter(s-> Objects.equals(s.getEmail(), customerEmail)).toList().get(0);
-        if(cc.getCustomerTracks(c.getId()).equals(t)){
-            return new ResponseEntity<>("Customer already owns the track", HttpStatus.OK);
+        if(cc.getAllCustomerTracks(c.getId()).equals(t)){
+             return new ResponseEntity<>("Customer already owns the track", HttpStatus.OK);
         }
         // Create invoice
         is.createInvoice(t,c);
@@ -61,46 +62,49 @@ public class TrackController {
     }
 
     @PostMapping("/chinook/track/create")
-    public ResponseEntity createTrack(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Track newTrack){
-        String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/track/create")){
-            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        trackRepository.save(newTrack);
-        return new ResponseEntity(newTrack, HttpStatus.OK);
+    public ResponseEntity<?> createTrack(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Track newTrack, @RequestHeader("Accept") String contentType){
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            String token = authTokenHeader.split(" ")[1];
+            if (!as.isAuthorizedForAction(token, "/chinook/track/create")) {
+                return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+            }
+            trackRepository.save(newTrack);
+            return new ResponseEntity<>(newTrack, HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @GetMapping("chinook/track/read")
-    public ResponseEntity readTrack(@RequestParam Integer id){
-        Optional<Track> track = trackRepository.findById(id);
-        if (track.isPresent()) {
-            return new ResponseEntity(track,HttpStatus.OK);
-        }
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> readTrack(@RequestParam Integer id, @RequestHeader("Accept") String contentType){
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            Optional<Track> track = trackRepository.findById(id);
+            if (track.isPresent()) {
+                return new ResponseEntity<>(track, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PutMapping(value = "/chinook/track/update")
-    public ResponseEntity updateTrack(@RequestBody Track newState, @RequestHeader("Authorization") String authTokenHeader){
-        String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/track/update")){
-            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        Optional<Track> oldState = trackRepository.findById(newState.getId());
-        if(oldState.isEmpty()) return null;
-        trackRepository.save(newState);
-        return new ResponseEntity(newState, HttpStatus.OK);
+    public ResponseEntity<?> updateTrack(@RequestBody Track newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType){
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            String token = authTokenHeader.split(" ")[1];
+            if (!as.isAuthorizedForAction(token, "/chinook/track/update")) {
+                return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+            }
+            Optional<Track> oldState = trackRepository.findById(newState.getId());
+            if (oldState.isEmpty()) return null;
+            trackRepository.save(newState);
+            return new ResponseEntity<>(newState, HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @DeleteMapping(value = "/chinook/track/delete")
-    public ResponseEntity deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
+    public ResponseEntity<String> deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
         if(as.isAuthorizedForAction(token,"chinook/track/delete")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         trackRepository.delete(trackRepository.getById(id));
-        return new ResponseEntity("Track deleted", HttpStatus.OK);
-    }
-    public void deleteTrack(Integer id){
-        trackRepository.delete(trackRepository.getById(id));
+        return new ResponseEntity<>("Track deleted", HttpStatus.OK);
     }
 }
