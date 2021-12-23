@@ -33,6 +33,7 @@ public class CustomerController {
     @PostMapping("/chinook/customer/create")
     public ResponseEntity<String> createCustomer(@RequestBody Customer newCustomer, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
+            if(customerRepository.existsByEmail(newCustomer.getEmail())) return new ResponseEntity<>("Customer already Exist", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             customerRepository.save(newCustomer);
             return new ResponseEntity<>("Customer Created", HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
