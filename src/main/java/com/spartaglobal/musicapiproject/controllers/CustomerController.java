@@ -5,10 +5,12 @@ import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,41 +36,58 @@ public class CustomerController {
     private InvoiceService is;
 
 
-    @PostMapping("/chinook/customer/create")
-    public ResponseEntity<Customer> createCustomer(@RequestHeader("Authorization") String authTokenHeader,
-                                                   @RequestBody Customer newCustomer) {
-        String token = authTokenHeader.split(" ")[1];
-        if (!as.isAuthorizedForAction(token, "chinook/customer/create")) {
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
+    @PostMapping("chinook/customer/create")
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+        Customer existCustomer = customerRepository.getCustomerByEmail(newCustomer.getEmail());
+        if (existCustomer != null) return new ResponseEntity("{\"message\":\"Customer Already Exist\"}",headers,HttpStatus.OK);
         customerRepository.save(newCustomer);
-        return new ResponseEntity("Customer Created", HttpStatus.OK);
+        String message = "{\"message\":\"Account Created\",\"customer\":" + newCustomer.getCustomer()+"}";
+        return new ResponseEntity(message,headers,HttpStatus.OK);
     }
 
-    // should require authentication to prevent accessing other people's data via id tests?
-    // TODO: deal with customer not found/doesn't exist in response entity
-    @GetMapping("/chinook/customer")
-    public ResponseEntity<Customer> readCustomer(@RequestParam Integer id) {
-        Customer customer = customerRepository.getById(id);
-        return new ResponseEntity(customer, HttpStatus.OK);
+    @GetMapping("chinook/customer")
+    public ResponseEntity<String> readCustomer(@RequestHeader("Authorization") String authToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+        if (as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer")){
+            Token token = tokenRepository.getByAuthToken(authToken.split(" ")[1]);
+            Customer customer = customerRepository.getCustomerByEmail(token.getEmail());
+            String returnMessage = "{\"message\":\"Your Account Details\",\"customer\":" + customer.getCustomer() + "}";
+        return new ResponseEntity<String>(returnMessage,headers,HttpStatus.OK);
+        }
+        return new ResponseEntity<>("{\"message\":\"Not Authorized\"}",headers,HttpStatus.OK);
     }
 
 
-    @PutMapping("/chinook/customer/update")
+    @PutMapping("chinook/customer/update")
     public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (!as.isAuthorizedForAction(token, "chinook/customer/update")) {
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        Optional<Customer> oldState = customerRepository.findById(newState.getId());
-        if (oldState.isEmpty()) return null;
-        customerRepository.save(newState);
-        return new ResponseEntity("Customer updated", HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+         if (!as.isAuthorizedForAction(token, "chinook/customer/update")) {
+             return new ResponseEntity("{\"message\":\"Not Authorized\"}", headers, HttpStatus.UNAUTHORIZED);
+         }
+            Token token1 = tokenRepository.getByAuthToken(token);
+        Customer oldState = customerRepository.getCustomerByEmail(token1.getEmail());
+        if (oldState == null) return new ResponseEntity("{\"message\":\"Not to change\"}",headers, HttpStatus.OK);
+        if (newState.getAddress() != null) oldState.setAddress(newState.getAddress());
+        if (newState.getState() != null) oldState.setState(newState.getState());
+        if (newState.getCity() != null) oldState.setCity(newState.getCity());
+        if (newState.getCountry() != null) oldState.setCountry(newState.getCountry());
+        if (newState.getPostalCode() != null) oldState.setPostalCode(newState.getPostalCode());
+        if (newState.getPhone() != null) oldState.setPhone(newState.getPhone());
+        if (newState.getFax() != null) oldState.setFax(newState.getFax());
+        if (newState.getSupportRepId() != null) oldState.setSupportRepId(newState.getSupportRepId());
+        customerRepository.save(oldState);
+        String returnMessage = "{\"message\":\"Account Updated\",\"customer\":" + oldState.getCustomer() + "}";
+        return new ResponseEntity(returnMessage,headers, HttpStatus.OK);
     }
 
 
-    @GetMapping("/chinook/customer/tracks")
-    public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
+    @GetMapping("chinook/customer/tracks")
+    public List<Track> getCustomerTracks( @RequestParam Integer customerId) {
         Customer customer = customerRepository.getById(customerId);
         List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
                 .filter(s -> s.getCustomerId().equals(customer)).toList();
@@ -90,9 +109,11 @@ public class CustomerController {
 
     @DeleteMapping("chinook/customer/delete")
     public ResponseEntity<Customer> deleteCustomer(@RequestHeader("Authorization") String authTokenHeader) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
         String token = authTokenHeader.split(" ")[1];
         if (!as.isAuthorizedForAction(token, "chinook/customer/delete")) {
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity("{\"message\":\"Not Authorized\"}",headers, HttpStatus.UNAUTHORIZED);
         }
         Token tk = tokenRepository.getByAuthToken(token);
         Customer customer  = customerRepository.getCustomerByEmail(tk.getEmail());
@@ -107,7 +128,7 @@ public class CustomerController {
         }
         invoiceRepository.deleteAllInBatch(invoices);
         customerRepository.delete(customer);
-        return new ResponseEntity("Customer deleted", HttpStatus.OK);
+        return new ResponseEntity("{\"message\":\"Customer deleted\"}",headers, HttpStatus.OK);
     }
 
 
