@@ -1,8 +1,10 @@
 package com.spartaglobal.musicapiproject.controllers;
 
+
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,8 @@ public class InvoiceController {
     private AlbumController ac;
     @Autowired
     private BulkPurchaseDiscountRepository bulkPurchaseDiscountRepository;
+   @Autowired
+   private AuthorizationService authorizationService;
 
     public boolean createInvoice(List<Track> tracks, Customer customer) {
         if (tracks.isEmpty()) {
@@ -76,19 +80,22 @@ public class InvoiceController {
         return tracks;
     }
 
+
     public void viewInvoice() {
 //TODO, Ignas to check with Neil
     }
 
     @DeleteMapping("/chinook/invoice/delete")
-    public ResponseEntity deleteInvoice(@RequestHeader("Authorization") String authTokenHeader, @RequestParam Integer id) {
-        String token = authTokenHeader.split(" ")[1];
-        AuthorizationService as = new AuthorizationService();
-        if (!as.isAuthorizedForAction(token, "chinook/invoice/delete")) {
-            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        invoiceRepository.delete(invoiceRepository.getById(id));
-        return new ResponseEntity<>("Invoice Deleted", HttpStatus.OK);
+
+    public ResponseEntity<String> deleteInvoice(@RequestHeader("Authorization") String authTokenHeader,@RequestParam Integer id, @RequestHeader("Accept") String contentType){
+        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+            String token = authTokenHeader.split(" ")[1];
+            if (!authorizationService.isAuthorizedForAction(token, "chinook/invoice/delete")) {
+                return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+            }
+            invoiceRepository.delete(invoiceRepository.getById(id));
+            return new ResponseEntity<>("Invoice Deleted", HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     private BigDecimal getDiscountedPrice(List<Track> tracks) {
