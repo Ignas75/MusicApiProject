@@ -3,6 +3,7 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
+import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -33,27 +34,29 @@ public class PlaylistController {
     @Autowired
     private InvoicelineRepository invoicelineRepository;
     @Autowired
-    private AuthorizationService as = new AuthorizationService();
+    private AuthorizationService as;
     @Autowired
-    private CustomerController cc = new CustomerController();
+    private CustomerController cc;
     @Autowired
     private InvoiceService is;
 
 
     @GetMapping(value = "/chinook/playlist")
-    public Playlist getPlaylist(@RequestParam Integer id) {
-        Optional<Playlist> result = playlistRepository.findById(id);
-        if (result.isPresent()) {
-            return result.get();
-        } else {
-            return null;
-        }
+    public ResponseEntity<?> getPlaylist(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            Optional<Playlist> result = playlistRepository.findById(id);
+            if (result.isPresent()) {
+                return new ResponseEntity<>(result.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Playlist not Found", HttpStatus.NOT_FOUND);
+            }
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @Transactional
     @DeleteMapping(value = "/chinook/playlist/delete")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public ResponseEntity deletePlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
+    public ResponseEntity<String> deletePlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         // Authorization
         String token = authTokenHeader.split(" ")[1];
         if (!as.isAuthorizedForAction(token, "/chinook/playlist/delete")) {
@@ -81,50 +84,53 @@ public class PlaylistController {
                     trackRepository.delete(track);
                 }
                 playlistRepository.delete(playlist.get());
-                return new ResponseEntity("Playlist deleted", HttpStatus.OK);
+                return new ResponseEntity<>("Playlist deleted", HttpStatus.OK);
             }
-            return new ResponseEntity("Cannot delete playlist containing purchased songs", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Cannot delete playlist containing purchased songs", HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity("Playlist does not exist", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Playlist does not exist", HttpStatus.NOT_FOUND);
     }
 
     @PostMapping(value = "/chinook/playlist/add")
-    public Playlisttrack addTrackToPlaylist(@Valid @RequestBody Playlisttrack playlisttrack) {
-        return playlisttrackRepository.save(playlisttrack);
+    public ResponseEntity<?> addTrackToPlaylist(@Valid @RequestBody Playlisttrack playlisttrack, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            return new ResponseEntity<>(playlisttrackRepository.save(playlisttrack), HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @PostMapping(value = "/chinook/playlist/remove")
+    public ResponseEntity<?> removeTrackFromPlaylist(@Valid @RequestBody Playlisttrack playlisttrack, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            return new ResponseEntity<>(playlisttrackRepository.save(playlisttrack), HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PostMapping(value = "/chinook/playlist/create")
-    public ResponseEntity addPlaylist(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Playlist newPlaylist) {
-        String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/playlist/create")){
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        playlistRepository.save(newPlaylist);
-        return new ResponseEntity(newPlaylist, HttpStatus.OK);
+    public ResponseEntity<?> addTrackToPlaylist(@Valid @RequestBody Playlist playlist, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            return new ResponseEntity<>(playlistRepository.save(playlist), HttpStatus.OK);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    @PutMapping(value = "/chinook/playlist/update")
-    public ResponseEntity updatePlaylist(@RequestBody Playlist newState, @RequestHeader("Authorization") String authTokenHeader){
-        String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/track/update")){
-            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        Optional<Playlist> oldState = playlistRepository.findById(newState.getId());
-        if (oldState.isEmpty()) return null;
-
-        playlistRepository.save(newState);
-        return new ResponseEntity(newState, HttpStatus.OK);
+    @PatchMapping(value = "/chinook/playlist/update")
+    public ResponseEntity<?> updateAlbum(@Valid @RequestBody Playlist playlist1, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
+            Optional<Playlist> res = playlistRepository.findById(playlist1.getId());
+            if (res.isPresent()) {
+                playlistRepository.save(playlist1);
+                return new ResponseEntity<>(playlist1, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Playlist Not Found", HttpStatus.NOT_FOUND);
+            }
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    @PostMapping(value = "/chinook/playlist/buy")
-    public ResponseEntity<String> buyPlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String dataFormat ) {
+    @PostMapping(value = "chinook/playlist/buy")
+    public ResponseEntity<String> buyPlaylist(@RequestParam Integer playListId, @RequestHeader("Authorization") String authToken) {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
-        if (dataFormat.equals("application/json")){
-            headers.add("content-type", "application/json");
-        }
-        headers.add("content-type", "application/xml");
-        if (!as.isAuthorizedForAction(token, "/chinook/playlist/buy")) {
+        headers.add("content-type", "application/json");
+        if (!as.isAuthorizedForAction(token, "chinook/playlist/buy")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Token user = tokenRepository.getByAuthToken(token);
@@ -135,16 +141,17 @@ public class PlaylistController {
         /* Finds all the tracks based on the playlist id*/
         List<Playlisttrack> allPlaylistTracks = playlisttrackRepository.findAll()
                 .stream()
-                .filter(s -> Objects.equals(s.getId().getPlaylistId(), id))
+                .filter(s -> Objects.equals(s.getId().getPlaylistId(), playListId))
                 .toList();
 
         List<Track> allTracks = new ArrayList<>();
         for (Playlisttrack t : allPlaylistTracks) {
             allTracks.add(trackRepository.getById(t.getId().getTrackId()));
         }
-        allTracks.remove(cc.getCustomerTracks(customer.getId()));
-        if(is.createInvoice(allTracks, customer)){
-            return new ResponseEntity<>("Invoice(s) created", HttpStatus.OK);
+
+        allTracks.remove(cc.getAllCustomerTracks(customer.getId()));
+        if (is.createInvoice(allTracks, customer)) {
+            return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
         }
         return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);
     }
