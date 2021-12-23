@@ -100,7 +100,7 @@ public class PurchaseController {
     // return album price
     // TODO: needs to check for discounts in a discount table and whether they still apply
     @GetMapping(value = "/chinook/album/customer/cost")
-    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId, @RequestParam Integer customerId) {
+    public ResponseEntity<String> getAlbumCostMappingForCustomer(@RequestParam Integer albumId, @RequestParam Integer customerId) {
         List<Track> userTracks = getUserTracks(customerId);
         List<Track> albumTracks = getAlbumTracks(albumId);
         BigDecimal totalCost = new BigDecimal(0);
@@ -113,8 +113,8 @@ public class PurchaseController {
     }
 
     // TODO: needs to check for discounts in a discount table and whether they still apply
-    @GetMapping(value = "/chinook/album/cost")
-    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId) {
+    @GetMapping(value = "/chinook/album/cost/nodiscount")
+    public ResponseEntity<String> getAlbumCostMapping(@RequestParam Integer albumId) {
         List<Track> albumTracks = getAlbumTracks(albumId);
         BigDecimal totalCost = new BigDecimal(0);
         for (Track track : albumTracks) {

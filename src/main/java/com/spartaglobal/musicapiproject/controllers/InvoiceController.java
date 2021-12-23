@@ -117,7 +117,7 @@ public class InvoiceController {
         for (Album albumsInTrack : albumsInTracks) {
             List<Track> tracksInAlbum = trackRepository.findByAlbumId(albumsInTrack);
             if (tracks.contains(tracksInAlbum)) {
-                totalPrice = totalPrice.add(ac.getAlbumCost(albumsInTrack));
+                totalPrice = totalPrice.add(ac.getAlbumCostStandalone(albumsInTrack));
             } else {
                 bulkDiscountTracks.addAll(tracksInAlbum);
             }
