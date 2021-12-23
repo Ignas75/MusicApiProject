@@ -19,26 +19,19 @@ public class ArtistControllerTest {
 
     @Test
     public void createArtist() throws IOException, URISyntaxException, InterruptedException {
-        HttpResponse<String> resp = ArtistRequest.postArtistRequest("jj11bpuFUxK2u4PmikEW");
-        Assertions.assertEquals("Yefri", ArtistRequest.returnJsonBody(resp).getName());
+        ArtistId artist = RequestBuilder.postArtist("ihKc6Ot7BE9MtptdVG5e");
+        Assertions.assertEquals("George", artist.getName());
     }
 
     @Test
     public void updateArtist() throws IOException, URISyntaxException, InterruptedException {
-
-        //setting original value
-        HttpResponse<String> resp = ArtistRequest.putArtistRequest("jj11bpuFUxK2u4PmikEW", 6, "Antônio Carlos Jobim");
-        Assertions.assertEquals("Antônio Carlos Jobim", ArtistRequest.returnJsonBody(resp).getName());
-        //reading the entry after updating
-        HttpResponse<String> resp2 = ArtistRequest.putArtistRequest("jj11bpuFUxK2u4PmikEW", 6, "AC/DC");
-        Assertions.assertEquals("AC/DC", ArtistRequest.returnJsonBody(resp2).getName());
+        ArtistId artist = RequestBuilder.putArtist("ihKc6Ot7BE9MtptdVG5e");
+        Assertions.assertEquals("AC/Yefri", artist.getName());
     }
 
-    // cant delete due to foreign keys, dependent on invoice line
-//    @Test
-//    public void deleteArtist() throws IOException, URISyntaxException, InterruptedException {
-//        HttpResponse<String> resp = ArtistRequest.deleteArtistRequest("jj11bpuFUxK2u4PmikEW", 6);
-//        Assertions.assertEquals(resp.statusCode(), 200);
-//    }
-
+    @Test
+    public void deleteArtist() throws IOException, URISyntaxException, InterruptedException {
+        String response = RequestBuilder.deleteArtist(276, "ihKc6Ot7BE9MtptdVG5e");
+        Assertions.assertEquals("Artist deleted", response);
+    }
 }
