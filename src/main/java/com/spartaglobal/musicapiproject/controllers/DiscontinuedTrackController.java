@@ -1,6 +1,8 @@
 package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.DiscontinuedTrack;
+import com.spartaglobal.musicapiproject.entities.Track;
 import com.spartaglobal.musicapiproject.repositories.DiscontinuedTrackRepository;
+import com.spartaglobal.musicapiproject.repositories.TrackRepository;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,10 +20,17 @@ public class DiscontinuedTrackController {
     @Autowired
     private AuthorizationService authorizationService;
 
+    @Autowired
+    private TrackRepository trackRepository;
+
+    // TODO: check if authentication would be advised to used here
     @GetMapping(value = "/chinook/discontinuedtrack")
-    public Optional<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
+    public ResponseEntity<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
         Optional<DiscontinuedTrack> result = discontinuedTrackRepository.findById(id);
-        return result;
+        if(result.isEmpty()){
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/chinook/discontinuedtrack/delete")
@@ -35,12 +44,18 @@ public class DiscontinuedTrackController {
     }
 
     @PostMapping(value = "/chinook/discontinuedtrack/insert")
-    public ResponseEntity insertDiscontinuedTrack(@RequestBody DiscontinuedTrack track, @RequestHeader("Authorization") String authTokenHeader) {
+    public ResponseEntity insertDiscontinuedTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
         if (!authorizationService.isAuthorizedForAction(token, "/chinook/discontinuedtrack/insert")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
-        discontinuedTrackRepository.save(track);
+        DiscontinuedTrack dct = new DiscontinuedTrack();
+        Optional<Track> findTrack = trackRepository.findById(id);
+        if (findTrack.isEmpty()) {
+            return new ResponseEntity("Track not found", HttpStatus.NOT_FOUND);
+        }
+        dct.setTrackId(findTrack.get());
+        discontinuedTrackRepository.save(dct);
         return new ResponseEntity("Track inserted into discontinued", HttpStatus.OK);
     }
 

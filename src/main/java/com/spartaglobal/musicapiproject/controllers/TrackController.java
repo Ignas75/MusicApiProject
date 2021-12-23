@@ -1,10 +1,9 @@
 package com.spartaglobal.musicapiproject.controllers;
 
 import com.spartaglobal.musicapiproject.entities.Customer;
+import com.spartaglobal.musicapiproject.entities.Invoiceline;
 import com.spartaglobal.musicapiproject.entities.Track;
-import com.spartaglobal.musicapiproject.repositories.CustomerRepository;
-import com.spartaglobal.musicapiproject.repositories.TokenRepository;
-import com.spartaglobal.musicapiproject.repositories.TrackRepository;
+import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,6 +25,10 @@ public class TrackController {
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
+    private InvoicelineRepository invoicelineRepository;
+    @Autowired
+    private PlaylisttrackRepository playlistTrackRepository;
+    @Autowired
     private AuthorizationService as;
     @Autowired
     private CustomerController cc;
@@ -34,7 +38,9 @@ public class TrackController {
     @GetMapping("/chinook/track/buy")
     public ResponseEntity buyTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        // Valid token check
+        if(!as.isAuthorizedForAction(token,"chinook/track/buy")){
+            return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
+        }
         String customerEmail;
         try {
             customerEmail = tokenRepository.getByAuthToken(token).getEmail();
@@ -63,7 +69,7 @@ public class TrackController {
     @PostMapping("/chinook/track/create")
     public ResponseEntity createTrack(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Track newTrack){
         String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/track/create")){
+        if(!as.isAuthorizedForAction(token,"chinook/track/create")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         trackRepository.save(newTrack);
@@ -82,7 +88,7 @@ public class TrackController {
     @PutMapping(value = "/chinook/track/update")
     public ResponseEntity updateTrack(@RequestBody Track newState, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/track/update")){
+        if(!as.isAuthorizedForAction(token,"chinook/track/update")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Track> oldState = trackRepository.findById(newState.getId());
@@ -91,16 +97,21 @@ public class TrackController {
         return new ResponseEntity(newState, HttpStatus.OK);
     }
 
+    // Delete tracks which have not been purchased
+    @Transactional
     @DeleteMapping(value = "/chinook/track/delete")
     public ResponseEntity deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(as.isAuthorizedForAction(token,"chinook/track/delete")){
+        if(!as.isAuthorizedForAction(token,"/chinook/track/delete")){
+
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
-        trackRepository.delete(trackRepository.getById(id));
-        return new ResponseEntity("Track deleted", HttpStatus.OK);
-    }
-    public void deleteTrack(Integer id){
-        trackRepository.delete(trackRepository.getById(id));
+        List<Invoiceline> invoiceLines = invoicelineRepository.findAllByTrackId(trackRepository.getById(id));
+        if(invoiceLines.isEmpty()) {
+            playlistTrackRepository.deleteByIdTrackId(id);
+            trackRepository.delete(trackRepository.getById(id));
+            return new ResponseEntity("Track deleted", HttpStatus.OK);
+        }
+        return new ResponseEntity("Cannot delete purchased track", HttpStatus.FORBIDDEN);
     }
 }
