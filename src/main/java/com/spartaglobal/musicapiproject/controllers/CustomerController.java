@@ -59,18 +59,6 @@ public class CustomerController {
         return new ResponseEntity("Customer updated", HttpStatus.OK);
     }
 
-
-    @DeleteMapping("/chinook/customer/delete")
-    public ResponseEntity<Customer> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
-        String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
-
-            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        customerRepository.delete(customerRepository.getById(id));
-        return new ResponseEntity("Customer deleted", HttpStatus.OK);
-    }
-
     @GetMapping("/chinook/customer/tracks")
     public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
         Customer customer = customerRepository.getById(customerId);

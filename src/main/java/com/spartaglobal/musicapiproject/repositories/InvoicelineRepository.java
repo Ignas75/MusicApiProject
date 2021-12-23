@@ -11,4 +11,5 @@ public interface InvoicelineRepository extends JpaRepository<Invoiceline, Intege
     public void deleteByTrackId(Track track);
     List<Invoiceline> findAllByInvoiceId(Invoice invoice);
     void deleteAllByInvoiceId(Invoice invoice);
+    List<Invoiceline> findAllByTrackId(Track track);
 }
