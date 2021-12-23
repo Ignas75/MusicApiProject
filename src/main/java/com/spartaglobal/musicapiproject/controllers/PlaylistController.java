@@ -94,19 +94,26 @@ public class PlaylistController {
     }
 
     @PostMapping(value = "/chinook/playlist/create")
-    public Playlist addPlaylist(@Valid @RequestBody Playlist playlist) {
-        return playlistRepository.save(playlist);
+    public ResponseEntity addPlaylist(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Playlist newPlaylist) {
+        String token = authTokenHeader.split(" ")[1];
+        if(!as.isAuthorizedForAction(token,"/chinook/playlist/create")){
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
+        }
+        playlistRepository.save(newPlaylist);
+        return new ResponseEntity(newPlaylist, HttpStatus.OK);
     }
 
-    @PatchMapping(value = "/chinook/playlist/update")
-    public Playlist updatePlaylist(@Valid @RequestBody Playlist playlist1) {
-        Optional<Playlist> res = playlistRepository.findById(playlist1.getId());
-        if (res.isPresent()) {
-            playlistRepository.save(playlist1);
-            return playlist1;
-        } else {
-            return null;
+    @PutMapping(value = "/chinook/playlist/update")
+    public ResponseEntity updatePlaylist(@RequestBody Playlist newState, @RequestHeader("Authorization") String authTokenHeader){
+        String token = authTokenHeader.split(" ")[1];
+        if(!as.isAuthorizedForAction(token,"/chinook/track/update")){
+            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
+        Optional<Playlist> oldState = playlistRepository.findById(newState.getId());
+        if (oldState.isEmpty()) return null;
+
+        playlistRepository.save(newState);
+        return new ResponseEntity(newState, HttpStatus.OK);
     }
 
     @PostMapping(value = "/chinook/playlist/buy")

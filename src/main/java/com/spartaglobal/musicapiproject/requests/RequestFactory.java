@@ -137,6 +137,18 @@ public class RequestFactory {
         return playlistMapper(resp);
     }
 
+    public static PlaylistPOJO postPlaylist(String token) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> resp = responseBuilder("/chinook/playlist/create", null, token, "POST",
+                "playlist.json");
+        return playlistMapper(resp);
+    }
+
+    public static PlaylistPOJO putPlaylist(String token) throws IOException, InterruptedException, URISyntaxException {
+        HttpResponse<String> resp = responseBuilder("/chinook/playlist/update", null, token, "PUT",
+                "updatePlaylist.json");
+        return playlistMapper(resp);
+    }
+
     public static String deletePlaylist(Integer id, String token) throws IOException, InterruptedException, URISyntaxException {
         HttpResponse<String> resp = responseBuilder("/chinook/playlist/delete", id, token, "DELETE", null);
         return resp.body();

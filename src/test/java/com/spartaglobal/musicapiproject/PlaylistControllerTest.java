@@ -11,16 +11,23 @@ import java.net.URISyntaxException;
 
 public class PlaylistControllerTest {
     @Test
-    public void getArtistIdTest() throws IOException, URISyntaxException, InterruptedException {
-        ArtistId artist = RequestFactory.getArtistRequest(1);
-        Assertions.assertEquals(1, artist.getId());
-    }
-
-    @Test
     public void getPlaylistTest() throws IOException, URISyntaxException, InterruptedException {
         PlaylistPOJO playlist = RequestFactory.getPlaylist(1);
         Assertions.assertEquals(1, playlist.getId());
     }
+
+    @Test
+    public void postPlaylistTest() throws IOException, URISyntaxException, InterruptedException {
+        PlaylistPOJO playlist = RequestFactory.postPlaylist("ihKc6Ot7BE9MtptdVG5e");
+        Assertions.assertEquals("Bouncy Stuff", playlist.getName());
+    }
+
+    @Test
+    public void putPlaylistTest() throws IOException, URISyntaxException, InterruptedException {
+        PlaylistPOJO playlist = RequestFactory.putPlaylist("ihKc6Ot7BE9MtptdVG5e");
+        Assertions.assertEquals("Bouncy Stuff v2", playlist.getName());
+    }
+
 
     @Test
     public void deletePlaylistTest() throws IOException, URISyntaxException, InterruptedException {
