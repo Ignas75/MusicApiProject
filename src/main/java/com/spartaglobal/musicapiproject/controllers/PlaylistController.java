@@ -35,6 +35,7 @@ public class PlaylistController {
     @Autowired
     private DiscontinuedTrackRepository discontinuedTrackRepository;
 
+    private InvoicelineRepository invoicelineRepository;
 
     @Autowired
     private AuthorizationService as = new AuthorizationService();
@@ -54,12 +55,12 @@ public class PlaylistController {
     }
 
     @Transactional
-    @DeleteMapping(value = "/chinook/playlist/delete")
+    @DeleteMapping(value = "chinook/playlist/delete")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public ResponseEntity deletePlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         // Authorization
         String token = authTokenHeader.split(" ")[1];
-        if (!as.isAuthorizedForAction(token, "/chinook/playlist/delete")) {
+        if (!as.isAuthorizedForAction(token, "chinook/playlist/delete")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         // Check playlist exists
@@ -141,7 +142,7 @@ public class PlaylistController {
                 allTracks.add(track);
             }
         }
-        allTracks.remove(cc.getCustomerTracks(customer.getId()));
+        allTracks.removeAll(cc.getCustomerTracks(customer.getId()));
         if (is.createInvoice(allTracks, customer)) {
             return new ResponseEntity<>("{\"message\":\"Playlist Purchase Complete\"}", headers, HttpStatus.OK);
         }

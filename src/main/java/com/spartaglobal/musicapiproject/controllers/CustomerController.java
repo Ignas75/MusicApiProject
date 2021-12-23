@@ -35,6 +35,7 @@ public class CustomerController {
     @Autowired
     private InvoiceService is;
 
+
     @PostMapping("chinook/customer/create")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
         HttpHeaders headers = new HttpHeaders();
@@ -66,8 +67,9 @@ public class CustomerController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
          if (!as.isAuthorizedForAction(token, "chinook/customer/update")) {
-            return new ResponseEntity("{\"message\":\"Not Authorized\"}",headers, HttpStatus.UNAUTHORIZED);
-        Token token1 = tokenRepository.getByAuthToken(token);
+             return new ResponseEntity("{\"message\":\"Not Authorized\"}", headers, HttpStatus.UNAUTHORIZED);
+         }
+            Token token1 = tokenRepository.getByAuthToken(token);
         Customer oldState = customerRepository.getCustomerByEmail(token1.getEmail());
         if (oldState == null) return new ResponseEntity("{\"message\":\"Not to change\"}",headers, HttpStatus.OK);
         if (newState.getAddress() != null) oldState.setAddress(newState.getAddress());
