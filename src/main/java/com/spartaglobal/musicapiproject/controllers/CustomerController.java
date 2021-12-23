@@ -3,7 +3,6 @@ package com.spartaglobal.musicapiproject.controllers;
 import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
-import com.spartaglobal.musicapiproject.services.ContentTypeService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -26,70 +25,69 @@ public class CustomerController {
     @Autowired
     private InvoiceRepository invoiceRepository;
     @Autowired
+    private InvoicelineRepository invoicelineRepository;
+    @Autowired
+    private ArchiveinvoiceRepository archiveinvoiceRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
+    @Autowired
     private AuthorizationService as;
     @Autowired
     private InvoiceService is;
 
-    @PostMapping("/chinook/customer/create")
-    public ResponseEntity<String> createCustomer(@RequestBody Customer newCustomer, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType) != null) {
-            customerRepository.save(newCustomer);
-            return new ResponseEntity<>("Customer Created", HttpStatus.OK);
-        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+
+    @PostMapping("chinook/customer/create")
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+        Customer existCustomer = customerRepository.getCustomerByEmail(newCustomer.getEmail());
+        if (existCustomer != null) return new ResponseEntity("{\"message\":\"Customer Already Exist\"}",headers,HttpStatus.OK);
+        customerRepository.save(newCustomer);
+        String message = "{\"message\":\"Account Created\",\"customer\":" + newCustomer.getCustomer()+"}";
+        return new ResponseEntity(message,headers,HttpStatus.OK);
     }
 
-    @GetMapping("/chinook/customer")
-    public ResponseEntity<?> readCustomer(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType) != null) {
-            Customer customer = customerRepository.getById(id);
-            return new ResponseEntity<>(customer, HttpStatus.OK);
-        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-    }
-
-
-    @PutMapping("/chinook/customer/update")
-    public ResponseEntity<String> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType) != null) {
-            String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/customer/create")) {
-                return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-            }
-            Optional<Customer> oldState = customerRepository.findById(newState.getId());
-            if (oldState.isEmpty()) return null;
-            customerRepository.save(newState);
-            return new ResponseEntity<>("Customer updated", HttpStatus.OK);
-        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    @GetMapping("chinook/customer")
+    public ResponseEntity<String> readCustomer(@RequestHeader("Authorization") String authToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+        if (as.isAuthorizedForAction(authToken.split(" ")[1], "chinook/customer")){
+            Token token = tokenRepository.getByAuthToken(authToken.split(" ")[1]);
+            Customer customer = customerRepository.getCustomerByEmail(token.getEmail());
+            String returnMessage = "{\"message\":\"Your Account Details\",\"customer\":" + customer.getCustomer() + "}";
+        return new ResponseEntity<String>(returnMessage,headers,HttpStatus.OK);
+        }
+        return new ResponseEntity<>("{\"message\":\"Not Authorized\"}",headers,HttpStatus.OK);
     }
 
 
-    @DeleteMapping("/chinook/customer/delete")
-    public ResponseEntity<String> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType) != null) {
-            String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/customer/delete")) {
-                return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-            }
-            customerRepository.delete(customerRepository.getById(id));
-            return new ResponseEntity<>("Customer deleted", HttpStatus.OK);
-        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    @PutMapping("chinook/customer/update")
+    public ResponseEntity<Customer> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader) {
+        String token = authTokenHeader.split(" ")[1];
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+         if (!as.isAuthorizedForAction(token, "chinook/customer/update")) {
+             return new ResponseEntity("{\"message\":\"Not Authorized\"}", headers, HttpStatus.UNAUTHORIZED);
+         }
+            Token token1 = tokenRepository.getByAuthToken(token);
+        Customer oldState = customerRepository.getCustomerByEmail(token1.getEmail());
+        if (oldState == null) return new ResponseEntity("{\"message\":\"Not to change\"}",headers, HttpStatus.OK);
+        if (newState.getAddress() != null) oldState.setAddress(newState.getAddress());
+        if (newState.getState() != null) oldState.setState(newState.getState());
+        if (newState.getCity() != null) oldState.setCity(newState.getCity());
+        if (newState.getCountry() != null) oldState.setCountry(newState.getCountry());
+        if (newState.getPostalCode() != null) oldState.setPostalCode(newState.getPostalCode());
+        if (newState.getPhone() != null) oldState.setPhone(newState.getPhone());
+        if (newState.getFax() != null) oldState.setFax(newState.getFax());
+        if (newState.getSupportRepId() != null) oldState.setSupportRepId(newState.getSupportRepId());
+        customerRepository.save(oldState);
+        String returnMessage = "{\"message\":\"Account Updated\",\"customer\":" + oldState.getCustomer() + "}";
+        return new ResponseEntity(returnMessage,headers, HttpStatus.OK);
     }
 
-    @GetMapping("/chinook/customer/tracks")
-    public ResponseEntity<?> getCustomerTracks(@RequestParam Integer customerId, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType) != null) {
-            Customer customer = customerRepository.getById(customerId);
-            List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
-                    .filter(s -> s.getCustomerId().equals(customer)).toList();
-            List<Track> customerTracks = new ArrayList<>();
-            for (int i = 0; i < customerInvoices.size(); i++) {
-                customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
-            }
-            return new ResponseEntity<>(customerTracks, HttpStatus.OK);
-        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-    }
 
-    public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
-        Album album = albumRepository.getById(albumId);
+    @GetMapping("chinook/customer/tracks")
+    public List<Track> getCustomerTracks( @RequestParam Integer customerId) {
         Customer customer = customerRepository.getById(customerId);
         List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
                 .filter(s -> s.getCustomerId().equals(customer)).toList();
@@ -97,8 +95,42 @@ public class CustomerController {
         for (int i = 0; i < customerInvoices.size(); i++) {
             customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
         }
+        return customerTracks;
+    }
+
+
+    // TODO: move to service since it is used elsewhere in AlbumController
+    public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
+        Album album = albumRepository.getById(albumId);
+        List<Track> customerTracks = getCustomerTracks(customerId);
         return customerTracks.stream().filter(s -> s.getAlbumId().equals(album)).toList();
     }
+
+
+    @DeleteMapping("chinook/customer/delete")
+    public ResponseEntity<Customer> deleteCustomer(@RequestHeader("Authorization") String authTokenHeader) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("content-type", "application/json");
+        String token = authTokenHeader.split(" ")[1];
+        if (!as.isAuthorizedForAction(token, "chinook/customer/delete")) {
+            return new ResponseEntity("{\"message\":\"Not Authorized\"}",headers, HttpStatus.UNAUTHORIZED);
+        }
+        Token tk = tokenRepository.getByAuthToken(token);
+        Customer customer  = customerRepository.getCustomerByEmail(tk.getEmail());
+
+        //find all the invoices for that customer
+        List<Invoice> invoices = invoiceRepository.findAllByCustomerId(customer);
+
+        for (Invoice i : invoices){
+            archiveinvoiceRepository.save(genArchiveInvoice(i));
+            List<Invoiceline> invoicelines = invoicelineRepository.findAllByInvoiceId(i);
+            invoicelineRepository.deleteAllInBatch(invoicelines);
+        }
+        invoiceRepository.deleteAllInBatch(invoices);
+        customerRepository.delete(customer);
+        return new ResponseEntity("{\"message\":\"Customer deleted\"}",headers, HttpStatus.OK);
+    }
+
 
     private Archiveinvoice genArchiveInvoice(Invoice invoice){
         Archiveinvoice archiveinvoice = new Archiveinvoice();
@@ -112,16 +144,6 @@ public class CustomerController {
         return archiveinvoice;
     }
 
-    public List<Track> getAllCustomerTracks(Integer customerId) {
-        Customer customer = customerRepository.getById(customerId);
-        List<Invoice> customerInvoices = invoiceRepository.findAll().stream()
-                .filter(s -> s.getCustomerId().equals(customer)).toList();
-        List<Track> customerTracks = new ArrayList<>();
-        for (int i = 0; i < customerInvoices.size(); i++) {
-            customerTracks.addAll(is.getTracksFromInvoice(customerInvoices.get(i)));
-        }
-        return customerTracks;
-    }
 }
 
 
