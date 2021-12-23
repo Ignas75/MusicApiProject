@@ -47,7 +47,7 @@ public class PlaylistController {
 
     @GetMapping(value = "/chinook/playlist")
     public ResponseEntity<?> getTrack(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
             Optional<Playlist> result = playlistRepository.findById(id);
             if (result.isPresent()) {
                 return new ResponseEntity<>(result.get(), HttpStatus.OK);
@@ -97,21 +97,21 @@ public class PlaylistController {
 
     @PostMapping(value = "/chinook/playlist/add")
     public ResponseEntity<?> addTrackToPlaylist(@Valid @RequestBody Playlisttrack playlisttrack, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
             return new ResponseEntity<>(playlistTrackRepo.save(playlisttrack), HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PostMapping(value = "/chinook/playlist/remove")
     public ResponseEntity<?> removeTrackFromPlaylist(@Valid @RequestBody Playlisttrack playlisttrack, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
             return new ResponseEntity<>(playlistTrackRepo.save(playlisttrack), HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @PostMapping(value = "/chinook/playlist/create")
     public ResponseEntity<?> addTrackToPlaylist(@Valid @RequestBody Playlist playlist, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
             return new ResponseEntity<>(playlistRepository.save(playlist), HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
@@ -160,7 +160,7 @@ public class PlaylistController {
             }
         }
         allTracks.remove(cc.getAllCustomerTracks(customer.getId()));
-        if(is.createInvoice(allTracks, customer)){
+        if (is.createInvoice(allTracks, customer)) {
             return new ResponseEntity<>("Playlist Purchase Complete", HttpStatus.OK);
         }
         return new ResponseEntity<>("{\"message\":\"Customer already owns all tracks in the playlist\"}", headers, HttpStatus.OK);

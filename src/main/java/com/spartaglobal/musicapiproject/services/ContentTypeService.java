@@ -11,9 +11,9 @@ public class ContentTypeService {
 
     public static String getReturnContentType(String acceptHeaderValue) {
         if (acceptHeaderValue.split(" ").length > 1) {
-            String[] possibles =  acceptHeaderValue.split(" ");
-            for (String possible: possibles){
-                if (validContentTypesList.contains(possible)){
+            String[] possibles = acceptHeaderValue.split(" ");
+            for (String possible : possibles) {
+                if (validContentTypesList.contains(possible)) {
                     return possible;
                 }
             }

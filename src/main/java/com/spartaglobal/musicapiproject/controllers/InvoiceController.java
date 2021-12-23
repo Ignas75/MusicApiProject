@@ -15,16 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class InvoiceController {
 
     @Autowired
-    private InvoiceRepository invoiceRepository;
-    @Autowired
     AuthorizationService authorizationService;
+    @Autowired
+    private InvoiceRepository invoiceRepository;
 
-    public void viewInvoice(){
+    public void viewInvoice() {
 //TODO, Ignas to check with Neil
     }
+
     @DeleteMapping("/chinook/invoice/delete")
-    public ResponseEntity<String> deleteInvoice(@RequestHeader("Authorization") String authTokenHeader,@RequestParam Integer id, @RequestHeader("Accept") String contentType){
-        if (ContentTypeService.getReturnContentType(contentType)!= null) {
+    public ResponseEntity<String> deleteInvoice(@RequestHeader("Authorization") String authTokenHeader, @RequestParam Integer id, @RequestHeader("Accept") String contentType) {
+        if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
             if (!authorizationService.isAuthorizedForAction(token, "chinook/invoice/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);

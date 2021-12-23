@@ -9,7 +9,10 @@ import java.util.List;
 
 public interface InvoicelineRepository extends JpaRepository<Invoiceline, Integer> {
     public void deleteByTrackId(Track track);
+
     List<Invoiceline> findAllByInvoiceId(Invoice invoice);
+
     void deleteAllByInvoiceId(Invoice invoice);
+
     List<Invoiceline> findAllByTrackId(Track track);
 }

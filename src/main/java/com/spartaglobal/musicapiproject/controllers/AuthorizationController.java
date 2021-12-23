@@ -31,8 +31,8 @@ public class AuthorizationController {
     private CustomerRepository customerRepository;
 
     @GetMapping(value = "/chinook/token/create")
-    public ResponseEntity<String> generateNewAuthToken(@RequestParam String emailAddress, @RequestHeader("Accept") String acceptType){
-        if(ContentTypeService.getReturnContentType(acceptType) != null) {
+    public ResponseEntity<String> generateNewAuthToken(@RequestParam String emailAddress, @RequestHeader("Accept") String acceptType) {
+        if (ContentTypeService.getReturnContentType(acceptType) != null) {
             StringBuilder sb = new StringBuilder();
             Random rng = new Random();
             HttpHeaders headers = new HttpHeaders();
@@ -76,11 +76,11 @@ public class AuthorizationController {
                 tokenRepository.save(newToken);
             }
             return new ResponseEntity<>("token: " + sb, headers, HttpStatus.OK);
-        }else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @DeleteMapping("/chinook/token/delete")
-    public ResponseEntity<String> clearExistingAuthToken(@RequestParam String emailAddress,  @RequestHeader("Accept") String acceptType){
+    public ResponseEntity<String> clearExistingAuthToken(@RequestParam String emailAddress, @RequestHeader("Accept") String acceptType) {
         if (ContentTypeService.getReturnContentType(acceptType) != null) {
             HttpHeaders headers = new HttpHeaders();
             headers.add("content-type", acceptType);
