@@ -1,6 +1,7 @@
+USE Chinook;
 DROP TABLE IF EXISTS EndpointPermissions;
-DROP TABLE IF EXISTS Roles;
 DROP TABLE IF EXISTS Tokens;
+DROP TABLE IF EXISTS Roles;
 DROP TABLE IF EXISTS ArchiveInvoices;
 DROP VIEW IF EXISTS TrackPopularityByCountry;
 DROP VIEW IF EXISTS AlbumPopularityByCountry;
@@ -12,7 +13,29 @@ DROP VIEW IF EXISTS GlobalArtistPopularity;
 DROP VIEW IF EXISTS GlobalPlaylistPopularity;
 DROP VIEW IF EXISTS GlobalGenrePopularity;
 DROP VIEW IF EXISTS GlobalTrackPopularity;
+DROP TABLE IF EXISTS ArchiveInvoices;
 
+
+CREATE EVENT IF NOT EXISTS Chinook.autoDelTokens
+    ON SCHEDULE
+        EVERY 1 DAY
+    COMMENT 'Token has expired'
+    DO
+    DELETE
+    from Chinook.Tokens
+    WHERE timestampdiff(DAY, now(), dateCreated) > 7;
+
+CREATE TABLE ArchiveInvoices
+(
+    ArchiveID    INT auto_increment NOT NULL Primary KEY,
+    firstName    VARCHAR(50)        NOT NULL,
+    lastName     VARCHAR(50)        NOT NULL,
+    EmailAddress VARCHAR(50)        NOT NULL,
+    Address      VARCHAR(255)       NOT NULL,
+    PostalCode   VARCHAR(10)        NOT NULL,
+    InvoiceDate  DATE               NOT NULL,
+    Total        DECIMAL(10, 2)     NOT NULL
+);
 
 CREATE TABLE EndpointPermissions
 (
@@ -41,23 +64,23 @@ CREATE table Tokens
     FOREIGN KEY (roleID) REFERENCES Roles (roleID)
 );
 
-CREATE TABLE ArchiveInvoices
-(
-    ArchiveID    INT auto_increment NOT NULL Primary KEY,
-    firstName    VARCHAR(50)        NOT NULL,
-    lastName     VARCHAR(50)        NOT NULL,
-    EmailAddress VARCHAR(50)        NOT NULL,
-    Address      VARCHAR(255),
-    PostalCode   VARCHAR(10),
-    InvoiceDate  DATETIME           NOT NULL,
-    Total        DECIMAL(10, 2)     NOT NULL
-);
-
 INSERT INTO EndpointPermissions(url, isForCustomer, isForSalesStaff, isForAdmins)
 VALUES ("/chinook/album/delete", 0, 0, 1),
        ("/chinook/album/create", 0, 0, 1),
        ("/chinook/album/update", 0, 0, 1),
-       ("chinook/invoice/delete", 0, 0, 1),
+       ("/chinook/album/buy",1,0,0),
+       ("/chinook/artist/create", 0, 0, 1),
+       ("/chinook/artist/update", 0, 0, 1),
+       ("/chinook/artist/delete", 0, 0, 1),
+       ("/chinook/discontinuedtrack", 0 ,0,1),
+       ("/chinook/discontinuedtrack/delete", 0,0,1),
+       ("/chinook/discontinuedtrack/insert", 0,0,1),
+       ("chinook/invoice/delete", 0,1, 1),
+       ("/chinook/popularitybycountry/albums",0,1,1),
+       ("/chinook/popularitybycountry/artists",0,1,1),
+       ("/chinook/popularitybycountry/genres",0,1,1),
+       ("/chinook/popularitybycountry/playlists",0,1,1),
+       ("/chinook/popularitybycountry/tracks",0,1,1),
        ("/chinook/playlist/delete", 0, 0, 1),
        ("/chinook/playlist/add", 0, 0, 1),
        ("/chinook/playlist/remove", 0, 0, 1),
@@ -69,10 +92,8 @@ VALUES ("/chinook/album/delete", 0, 0, 1),
        ("/chinook/track/delete", 0, 0, 1),
        ("/chinook/customer/create", 0, 1, 1),
        ("/chinook/customer/update", 0, 1, 1),
-       ("/chinook/customer/delete", 0, 1, 1),
-       ("/chinook/artist/create", 0, 0, 1),
-       ("/chinook/artist/update", 0, 0, 1),
-       ("/chinook/artist/delete", 0, 0, 1);
+       ("/chinook/customer/delete", 0, 1, 1);
+
 
 
 INSERT INTO Roles

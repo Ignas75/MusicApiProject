@@ -82,15 +82,14 @@ public class TrackController {
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
-    @GetMapping("chinook/track/read")
-    public ResponseEntity<?> readTrack(@RequestParam Integer id, @RequestHeader("Accept") String contentType) {
-        if (ContentTypeService.getReturnContentType(contentType) != null) {
-            Optional<Track> track = trackRepository.findById(id);
-            if (track.isPresent()) {
-                return new ResponseEntity<>(track, HttpStatus.OK);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+
+    @GetMapping("chinook/track")
+    public ResponseEntity readTrack(@RequestParam Integer id) {
+        Optional<Track> track = trackRepository.findById(id);
+        if (track.isPresent()) {
+            return new ResponseEntity(track, HttpStatus.OK);
+        }
+        return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
     @PutMapping(value = "/chinook/track/update")
