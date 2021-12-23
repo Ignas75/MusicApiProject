@@ -130,7 +130,7 @@ public class PlaylistController {
         String token = authToken.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-        if (!as.isAuthorizedForAction(token, "chinook/playlist/buy")) {
+        if (!as.isAuthorizedForAction(token, "/chinook/playlist/buy")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Token user = tokenRepository.getByAuthToken(token);

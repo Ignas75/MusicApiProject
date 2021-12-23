@@ -61,7 +61,7 @@ public class AlbumController {
     public ResponseEntity<?> deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/album/delete")) {
+            if (as.isAuthorizedForAction(token, "/chinook/album/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
 
@@ -74,7 +74,7 @@ public class AlbumController {
     public ResponseEntity<?> createAlbum(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Album newAlbum, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/album/create")) {
+            if (as.isAuthorizedForAction(token, "/chinook/album/create")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             albumRepository.save(newAlbum);
@@ -87,7 +87,7 @@ public class AlbumController {
     public ResponseEntity<?> updateAlbum(@RequestBody Album newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/album/update")) {
+            if (as.isAuthorizedForAction(token, "/chinook/album/update")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             Optional<Album> oldState = albumRepository.findById(newState.getId());
@@ -109,7 +109,7 @@ public class AlbumController {
     public ResponseEntity<?> buyAlbum(@RequestParam Integer id, @RequestBody String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (as.isAuthorizedForAction(token, "chinook/track/buy")) {
+            if (as.isAuthorizedForAction(token, "/chinook/track/buy")) {
                 return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
             }
             String customerEmail;
