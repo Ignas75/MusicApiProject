@@ -35,7 +35,6 @@ public class CustomerController {
     @Autowired
     private InvoiceService is;
 
-
     @PostMapping("chinook/customer/create")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer newCustomer) {
         HttpHeaders headers = new HttpHeaders();
@@ -66,9 +65,8 @@ public class CustomerController {
         String token = authTokenHeader.split(" ")[1];
         HttpHeaders headers = new HttpHeaders();
         headers.add("content-type", "application/json");
-        if (!as.isAuthorizedForAction(token, "chinook/customer/create")) {
+         if (!as.isAuthorizedForAction(token, "chinook/customer/update")) {
             return new ResponseEntity("{\"message\":\"Not Authorized\"}",headers, HttpStatus.UNAUTHORIZED);
-        }
         Token token1 = tokenRepository.getByAuthToken(token);
         Customer oldState = customerRepository.getCustomerByEmail(token1.getEmail());
         if (oldState == null) return new ResponseEntity("{\"message\":\"Not to change\"}",headers, HttpStatus.OK);
@@ -99,6 +97,7 @@ public class CustomerController {
     }
 
 
+    // TODO: move to service since it is used elsewhere in AlbumController
     public List<Track> getUserPurchasedTracksFromAlbum(Integer customerId, Integer albumId) {
         Album album = albumRepository.getById(albumId);
         List<Track> customerTracks = getCustomerTracks(customerId);
