@@ -51,7 +51,9 @@ public class CustomerController {
     public ResponseEntity<String> updateCustomer(@RequestBody Customer newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/customer/create")) {
+
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             Optional<Customer> oldState = customerRepository.findById(newState.getId());
@@ -65,7 +67,9 @@ public class CustomerController {
     public ResponseEntity<String> deleteCustomer(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/customer/delete")) {
+
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             customerRepository.delete(customerRepository.getById(id));

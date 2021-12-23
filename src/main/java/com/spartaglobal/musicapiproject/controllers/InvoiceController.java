@@ -88,7 +88,7 @@ public class InvoiceController {
     public ResponseEntity<String> deleteInvoice(@RequestHeader("Authorization") String authTokenHeader, @RequestParam Integer id, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
-            if (!authorizationService.isAuthorizedForAction(token, "chinook/invoice/delete")) {
+            if (!authorizationService.isAuthorizedForAction(token, "/chinook/invoice/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             invoiceRepository.delete(invoiceRepository.getById(id));

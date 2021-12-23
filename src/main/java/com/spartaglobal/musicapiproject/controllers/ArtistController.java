@@ -44,7 +44,9 @@ public class ArtistController {
     public ResponseEntity<String> createArtist(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Artist newArtist, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/artist/create")) {
+
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             artistRepository.save(newArtist);
@@ -56,7 +58,9 @@ public class ArtistController {
     public ResponseEntity<String> updateTrack(@RequestBody Artist newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/artist/create")) {
+
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
             Optional<Artist> oldState = artistRepository.findById(newState.getId());
@@ -71,7 +75,9 @@ public class ArtistController {
     public ResponseEntity<String> deleteArtist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/artist/create")) {
+
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
 
             }

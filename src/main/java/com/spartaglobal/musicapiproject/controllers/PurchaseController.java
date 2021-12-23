@@ -134,7 +134,7 @@ public class PurchaseController {
                                                 @RequestParam String billingCountry, @RequestParam String postalCode,
                                                 @RequestHeader("Authorization") String authToken) {
 
-        if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[3], "chinook/album/purchase")) {
+        if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[3], "/chinook/album/purchase")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
 

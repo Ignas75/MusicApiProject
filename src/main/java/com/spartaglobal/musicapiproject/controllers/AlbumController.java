@@ -56,6 +56,7 @@ public class AlbumController {
     public ResponseEntity<?> deleteAlbum(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/album/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
@@ -97,6 +98,7 @@ public class AlbumController {
     public ResponseEntity<?> updateAlbum(@RequestBody Album newState, @RequestHeader("Authorization") String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/album/update")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
@@ -120,6 +122,7 @@ public class AlbumController {
     public ResponseEntity<?> buyAlbum(@RequestParam Integer id, @RequestBody String authTokenHeader, @RequestHeader("Accept") String contentType) {
         if (ContentTypeService.getReturnContentType(contentType) != null) {
             String token = authTokenHeader.split(" ")[1];
+
             if (!as.isAuthorizedForAction(token, "/chinook/track/buy")) {
                 return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
             }
