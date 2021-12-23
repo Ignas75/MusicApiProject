@@ -61,7 +61,7 @@ public class InvoiceService {
     public List<Track> getTracksFromInvoice(Invoice invoice) {
         List<Track> tracks = new java.util.ArrayList<>();
         List<Invoiceline> invoiceLines = invoiceLineRepository.findAll()
-                .stream().filter(s -> s.getInvoiceId().equals(invoice.getId())).toList();
+                .stream().filter(s -> s.getInvoiceId().getId().equals(invoice.getId())).toList();
         for (Invoiceline invoiceLine : invoiceLines) {
             tracks.add(invoiceLine.getTrackId());
         }
