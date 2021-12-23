@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface PlaylisttrackRepository extends JpaRepository<Playlisttrack, PlaylisttrackId> {
     public void deleteByIdTrackId(Integer id);
+
     public List<Playlisttrack> findAllByIdPlaylistId(Integer id);
 }

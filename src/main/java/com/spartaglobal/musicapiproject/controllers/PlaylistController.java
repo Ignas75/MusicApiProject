@@ -31,12 +31,7 @@ public class PlaylistController {
     @Autowired
     private PlaylistRepository playlistRepository;
     @Autowired
-    private PlaylisttrackRepository playlistTrackRepo;
-    @Autowired
-    private DiscontinuedTrackRepository discontinuedTrackRepository;
-
     private InvoicelineRepository invoicelineRepository;
-
     @Autowired
     private AuthorizationService as = new AuthorizationService();
     @Autowired
@@ -55,12 +50,12 @@ public class PlaylistController {
     }
 
     @Transactional
-    @DeleteMapping(value = "chinook/playlist/delete")
+    @DeleteMapping(value = "/chinook/playlist/delete")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public ResponseEntity deletePlaylist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
         // Authorization
         String token = authTokenHeader.split(" ")[1];
-        if (!as.isAuthorizedForAction(token, "chinook/playlist/delete")) {
+        if (!as.isAuthorizedForAction(token, "/chinook/playlist/delete")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         // Check playlist exists
@@ -131,21 +126,15 @@ public class PlaylistController {
                 .stream()
                 .filter(s -> Objects.equals(s.getId().getPlaylistId(), playListId))
                 .toList();
+
         List<Track> allTracks = new ArrayList<>();
         for (Playlisttrack t : allPlaylistTracks) {
-            //check if track is discontinued
-            Track track = trackRepository.getById(t.getId().getTrackId());
-            Optional<DiscontinuedTrack> dtr = discontinuedTrackRepository.findById(track.getId());
-            if (!(dtr.isEmpty()) && (dtr.get().getTrackId().getId() == track.getId())) {
-                System.out.println("Discontinued!");
-            } else {
-                allTracks.add(track);
-            }
+            allTracks.add(trackRepository.getById(t.getId().getTrackId()));
         }
         allTracks.removeAll(cc.getCustomerTracks(customer.getId()));
         if (is.createInvoice(allTracks, customer)) {
             return new ResponseEntity<>("{\"message\":\"Playlist Purchase Complete\"}", headers, HttpStatus.OK);
         }
-        return new ResponseEntity<>("{\"message\":\"Customer already owns all tracks in the playlist\"}", headers, HttpStatus.OK);
+        return new ResponseEntity<>("Customer already owns all tracks in the playlist", HttpStatus.OK);
     }
 }

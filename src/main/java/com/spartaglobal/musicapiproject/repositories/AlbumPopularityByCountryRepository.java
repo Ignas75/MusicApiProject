@@ -1,7 +1,6 @@
 package com.spartaglobal.musicapiproject.repositories;
 
 import com.spartaglobal.musicapiproject.entities.AlbumPopularityByCountry;
-import com.spartaglobal.musicapiproject.entities.ArtistPopularityByCountry;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 

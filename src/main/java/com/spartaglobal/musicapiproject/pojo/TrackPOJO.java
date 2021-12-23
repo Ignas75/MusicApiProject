@@ -2,107 +2,99 @@ package com.spartaglobal.musicapiproject.pojo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TrackPOJO{
+public class TrackPOJO {
 
-	public TrackPOJO() {
-	}
+    @JsonProperty("genreId")
+    private GenreId genreId;
+    @JsonProperty("unitPrice")
+    private double unitPrice;
+    @JsonProperty("milliseconds")
+    private int milliseconds;
+    @JsonProperty("composer")
+    private Object composer;
+    @JsonProperty("bytes")
+    private int bytes;
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("mediaTypeId")
+    private MediaTypeId mediaTypeId;
+    @JsonProperty("albumId")
+    private AlbumId albumId;
+    @JsonProperty("id")
+    private int id;
 
-	@JsonProperty("genreId")
-	private GenreId genreId;
+    public TrackPOJO() {
+    }
 
-	@JsonProperty("unitPrice")
-	private double unitPrice;
+    public GenreId getGenreId() {
+        return genreId;
+    }
 
-	@JsonProperty("milliseconds")
-	private int milliseconds;
+    public void setGenreId(GenreId genreId) {
+        this.genreId = genreId;
+    }
 
-	@JsonProperty("composer")
-	private Object composer;
+    public double getUnitPrice() {
+        return unitPrice;
+    }
 
-	@JsonProperty("bytes")
-	private int bytes;
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
 
-	@JsonProperty("name")
-	private String name;
+    public int getMilliseconds() {
+        return milliseconds;
+    }
 
-	@JsonProperty("mediaTypeId")
-	private MediaTypeId mediaTypeId;
+    public void setMilliseconds(int milliseconds) {
+        this.milliseconds = milliseconds;
+    }
 
-	@JsonProperty("albumId")
-	private AlbumId albumId;
+    public Object getComposer() {
+        return composer;
+    }
 
-	@JsonProperty("id")
-	private int id;
+    public void setComposer(Object composer) {
+        this.composer = composer;
+    }
 
-	public void setGenreId(GenreId genreId){
-		this.genreId = genreId;
-	}
+    public int getBytes() {
+        return bytes;
+    }
 
-	public GenreId getGenreId(){
-		return genreId;
-	}
+    public void setBytes(int bytes) {
+        this.bytes = bytes;
+    }
 
-	public void setUnitPrice(double unitPrice){
-		this.unitPrice = unitPrice;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public double getUnitPrice(){
-		return unitPrice;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setMilliseconds(int milliseconds){
-		this.milliseconds = milliseconds;
-	}
+    public MediaTypeId getMediaTypeId() {
+        return mediaTypeId;
+    }
 
-	public int getMilliseconds(){
-		return milliseconds;
-	}
+    public void setMediaTypeId(MediaTypeId mediaTypeId) {
+        this.mediaTypeId = mediaTypeId;
+    }
 
-	public void setComposer(Object composer){
-		this.composer = composer;
-	}
+    public AlbumId getAlbumId() {
+        return albumId;
+    }
 
-	public Object getComposer(){
-		return composer;
-	}
+    public void setAlbumId(AlbumId albumId) {
+        this.albumId = albumId;
+    }
 
-	public void setBytes(int bytes){
-		this.bytes = bytes;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public int getBytes(){
-		return bytes;
-	}
-
-	public void setName(String name){
-		this.name = name;
-	}
-
-	public String getName(){
-		return name;
-	}
-
-	public void setMediaTypeId(MediaTypeId mediaTypeId){
-		this.mediaTypeId = mediaTypeId;
-	}
-
-	public MediaTypeId getMediaTypeId(){
-		return mediaTypeId;
-	}
-
-	public void setAlbumId(AlbumId albumId){
-		this.albumId = albumId;
-	}
-
-	public AlbumId getAlbumId(){
-		return albumId;
-	}
-
-	public void setId(int id){
-		this.id = id;
-	}
-
-	public int getId(){
-		return id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 }

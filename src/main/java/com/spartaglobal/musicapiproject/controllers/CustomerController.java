@@ -116,12 +116,12 @@ public class CustomerController {
             return new ResponseEntity("{\"message\":\"Not Authorized\"}",headers, HttpStatus.UNAUTHORIZED);
         }
         Token tk = tokenRepository.getByAuthToken(token);
-        Customer customer  = customerRepository.getCustomerByEmail(tk.getEmail());
+        Customer customer = customerRepository.getCustomerByEmail(tk.getEmail());
 
         //find all the invoices for that customer
         List<Invoice> invoices = invoiceRepository.findAllByCustomerId(customer);
 
-        for (Invoice i : invoices){
+        for (Invoice i : invoices) {
             archiveinvoiceRepository.save(genArchiveInvoice(i));
             List<Invoiceline> invoicelines = invoicelineRepository.findAllByInvoiceId(i);
             invoicelineRepository.deleteAllInBatch(invoicelines);
@@ -132,12 +132,12 @@ public class CustomerController {
     }
 
 
-    private Archiveinvoice genArchiveInvoice(Invoice invoice){
+    private Archiveinvoice genArchiveInvoice(Invoice invoice) {
         Archiveinvoice archiveinvoice = new Archiveinvoice();
         archiveinvoice.setFirstName(invoice.getCustomerId().getFirstName());
         archiveinvoice.setLastName(invoice.getCustomerId().getLastName());
         archiveinvoice.setEmailAddress(invoice.getCustomerId().getEmail());
-        archiveinvoice.setAddress(invoice.getBillingAddress() +" "+  invoice.getBillingCity() +" "+  invoice.getBillingState() +" "+ invoice.getBillingCountry());
+        archiveinvoice.setAddress(invoice.getBillingAddress() + " " + invoice.getBillingCity() + " " + invoice.getBillingState() + " " + invoice.getBillingCountry());
         archiveinvoice.setPostalCode(invoice.getBillingPostalCode());
         archiveinvoice.setInvoiceDate(invoice.getInvoiceDate());
         archiveinvoice.setTotal(invoice.getTotal());

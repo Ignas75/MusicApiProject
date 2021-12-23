@@ -1,4 +1,5 @@
 package com.spartaglobal.musicapiproject.controllers;
+
 import com.spartaglobal.musicapiproject.entities.DiscontinuedTrack;
 import com.spartaglobal.musicapiproject.entities.Track;
 import com.spartaglobal.musicapiproject.repositories.DiscontinuedTrackRepository;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +29,7 @@ public class DiscontinuedTrackController {
     @GetMapping(value = "/chinook/discontinuedtrack")
     public ResponseEntity<DiscontinuedTrack> getDiscontinuedTrack(@RequestParam Integer id) {
         Optional<DiscontinuedTrack> result = discontinuedTrackRepository.findById(id);
-        if(result.isEmpty()){
+        if (result.isEmpty()) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result.get(), HttpStatus.OK);

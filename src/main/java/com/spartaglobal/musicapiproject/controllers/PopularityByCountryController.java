@@ -31,7 +31,7 @@ public class PopularityByCountryController {
     AuthorizationService authorizationService;
 
     @GetMapping("/chinook/popularitybycountry/albums")
-    public ResponseEntity<?> getAlbumPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken){
+    public ResponseEntity<?> getAlbumPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken) {
         if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[1], "/chinook/popularitybycountry/albums")) {
             if (sortType.equals("DESC")) {
                 List<AlbumPopularityByCountry> albumPopularityByCountries = albumPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.DESC, "Popularity")).subList(0, numRecords);
@@ -40,11 +40,12 @@ public class PopularityByCountryController {
                 List<AlbumPopularityByCountry> albumPopularityByCountries = albumPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.ASC, "Popularity")).subList(0, numRecords);
                 return new ResponseEntity<>(albumPopularityByCountries, HttpStatus.OK);
             } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
+        } else
+            return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/chinook/popularitybycountry/artists")
-    public ResponseEntity<?> getArtistPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken){
+    public ResponseEntity<?> getArtistPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken) {
         if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[1], "/chinook/popularitybycountry/artists")) {
             if (sortType.equals("DESC")) {
                 List<ArtistPopularityByCountry> artistPopularityByCountries = artistPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.DESC, "Popularity")).subList(0, numRecords);
@@ -53,11 +54,12 @@ public class PopularityByCountryController {
                 List<ArtistPopularityByCountry> artistPopularityByCountries = artistPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.ASC, "Popularity")).subList(0, numRecords);
                 return new ResponseEntity<>(artistPopularityByCountries, HttpStatus.OK);
             } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  else return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
+        } else
+            return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/chinook/popularitybycountry/genres")
-    public ResponseEntity<?> getGenrePopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken){
+    public ResponseEntity<?> getGenrePopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken) {
         if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[1], "/chinook/popularitybycountry/genres")) {
             if (sortType.equals("DESC")) {
                 List<GenrePopularityByCountry> genrePopularityByCountries = genrePopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.DESC, "Popularity")).subList(0, numRecords);
@@ -66,11 +68,12 @@ public class PopularityByCountryController {
                 List<GenrePopularityByCountry> genrePopularityByCountries = genrePopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.ASC, "Popularity")).subList(0, numRecords);
                 return new ResponseEntity<>(genrePopularityByCountries, HttpStatus.OK);
             } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  else return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
+        } else
+            return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/chinook/popularitybycountry/playlists")
-    public ResponseEntity<?> getPlaylistPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken){
+    public ResponseEntity<?> getPlaylistPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken) {
         if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[1], "/chinook/popularitybycountry/playlists")) {
             if (sortType.equals("DESC")) {
                 List<PlaylistPopularityByCountry> playlistPopularityByCountries = playlistPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.DESC, "Popularity")).subList(0, numRecords);
@@ -79,11 +82,12 @@ public class PopularityByCountryController {
                 List<PlaylistPopularityByCountry> playlistPopularityByCountries = playlistPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.ASC, "Popularity")).subList(0, numRecords);
                 return new ResponseEntity<>(playlistPopularityByCountries, HttpStatus.OK);
             } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  else return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
+        } else
+            return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/chinook/popularitybycountry/tracks")
-    public ResponseEntity<?> getTrackPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken){
+    public ResponseEntity<?> getTrackPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken) {
         if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[1], "/chinook/popularitybycountry/tracks")) {
             if (sortType.equals("DESC")) {
                 List<TrackPopularityByCountry> trackPopularityByCountries = trackPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.DESC, "Popularity")).subList(0, numRecords);
@@ -92,6 +96,7 @@ public class PopularityByCountryController {
                 List<TrackPopularityByCountry> trackPopularityByCountries = trackPopularityByCountryRepository.findAllByBillingCountry(country, Sort.by(Sort.Direction.ASC, "Popularity")).subList(0, numRecords);
                 return new ResponseEntity<>(trackPopularityByCountries, HttpStatus.OK);
             } else return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }  else return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
+        } else
+            return new ResponseEntity<>("You are not authorized for this page with your current access level", HttpStatus.UNAUTHORIZED);
     }
 }

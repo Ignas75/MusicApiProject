@@ -64,9 +64,9 @@ public class ArtistController {
 
     @Transactional
     @DeleteMapping(value = "/chinook/artist/delete")
-    public ResponseEntity<String> deleteArtist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader) {
+    public ResponseEntity<String> deleteArtist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if (!as.isAuthorizedForAction(token, "/chinook/artist/delete")) {
+        if(!as.isAuthorizedForAction(token,"/chinook/artist/delete")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Artist> artist = artistRepository.findById(id);

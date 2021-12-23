@@ -1,9 +1,6 @@
 package com.spartaglobal.musicapiproject.controllers;
 
-import com.spartaglobal.musicapiproject.entities.Album;
-import com.spartaglobal.musicapiproject.entities.Customer;
-import com.spartaglobal.musicapiproject.entities.Invoiceline;
-import com.spartaglobal.musicapiproject.entities.Track;
+import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.InvoiceService;
@@ -14,12 +11,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Collections.max;
+
 @RestController
 public class AlbumController {
+    AlbumDiscountRepository albumDiscountRepository;
+    @Autowired
+    BulkPurchaseDiscountRepository bulkPurchaseDiscountRepository;
     @Autowired
     private AlbumRepository albumRepository;
     @Autowired
@@ -41,7 +46,7 @@ public class AlbumController {
 
     @RequestMapping(value = "/chinook/album/{id}",
             method = RequestMethod.GET,
-            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Album getAlbum(@PathVariable Integer id) {
         Optional<Album> result = albumRepository.findById(id);
         if (result.isPresent()) {
@@ -81,7 +86,7 @@ public class AlbumController {
             }
             // Only delete if album doesn't contain any purchased
             if (noPurchasedTracks) {
-                for(Track track : albumTracks) {
+                for (Track track : albumTracks) {
                     playlisttrackRepository.deleteByIdTrackId(track.getId());
                     trackRepository.delete(track);
                 }
@@ -94,7 +99,7 @@ public class AlbumController {
     }
 
     @PostMapping("/chinook/album/create")
-    public ResponseEntity createAlbum(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Album newAlbum) {
+    public ResponseEntity createAlbum(@RequestHeader("Authorization") String authTokenHeader, @RequestHeader Album newAlbum) {
         String token = authTokenHeader.split(" ")[1];
         if (!as.isAuthorizedForAction(token, "chinook/album/create")) {
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
@@ -121,9 +126,9 @@ public class AlbumController {
     }
 
     @PostMapping("/chinook/album/buy")
-    public ResponseEntity buyAlbum(@RequestParam Integer id, @RequestBody String authTokenHeader) {
+    public ResponseEntity buyAlbum(@RequestParam Integer id, @RequestHeader String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-        if (as.isAuthorizedForAction(token, "chinook/track/buy")) {
+        if (as.isAuthorizedForAction(token, "chinook/album/buy")) {
             return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
         }
         String customerEmail;
@@ -134,15 +139,67 @@ public class AlbumController {
         }
         Album a = albumRepository.findById(id).stream().toList().get(0);
         if (a == null) {
-            return new ResponseEntity<>("Track does not exist", HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>("Album does not exist", HttpStatus.NO_CONTENT);
         }
         List<Track> t = trackRepository.findAllByAlbumId(albumRepository.getById(id));
         Customer c = customerRepository.findAll().stream().filter(s -> Objects.equals(s.getEmail(), customerEmail)).toList().get(0);
-        t.remove(cc.getUserPurchasedTracksFromAlbum(c.getId(),id));
-        if (is.createInvoice(t, c)) {
+        t.remove(cc.getUserPurchasedTracksFromAlbum(c.getId(), id));
+        ArrayList<AlbumDiscount> applicableAlbumDiscounts = (ArrayList<AlbumDiscount>) albumDiscountRepository.findAllById(List.of(id)).stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<BulkPurchaseDiscount> applicableBulkPurchaseDiscounts = (ArrayList<BulkPurchaseDiscount>) bulkPurchaseDiscountRepository.findAll().stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<Integer> listOfDiscounts = new ArrayList<>();
+        for (AlbumDiscount applicableAlbumDiscount : applicableAlbumDiscounts) {
+            listOfDiscounts.add(applicableAlbumDiscount.getDiscount());
+        }
+        for (BulkPurchaseDiscount applicableBulkPurchaseDiscount : applicableBulkPurchaseDiscounts) {
+            listOfDiscounts.add(applicableBulkPurchaseDiscount.getDiscount());
+        }
+        Integer maxDiscount = max(listOfDiscounts);
+        InvoiceController newInvoice = new InvoiceController();
+        if (newInvoice.createInvoice(t, c)) {
             return new ResponseEntity<>("Invoice(s) created", HttpStatus.OK);
         }
         return new ResponseEntity<>("Customer owns all the tracks in album", HttpStatus.OK);
+    }
+
+    @GetMapping("/chinook/album/cost")
+    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId) {
+        List<Track> albumTracks = getAlbumTracks(albumId);
+        BigDecimal totalCost = new BigDecimal(0);
+        for (Track track : albumTracks) {
+            totalCost = totalCost.add(track.getUnitPrice());
+        }
+        ArrayList<AlbumDiscount> applicableAlbumDiscounts = (ArrayList<AlbumDiscount>) albumDiscountRepository.findAllById(List.of(albumId)).stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<BulkPurchaseDiscount> applicableBulkPurchaseDiscounts = (ArrayList<BulkPurchaseDiscount>) bulkPurchaseDiscountRepository.findAll().stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<Integer> listOfDiscounts = new ArrayList<>();
+        for (AlbumDiscount applicableAlbumDiscount : applicableAlbumDiscounts) {
+            listOfDiscounts.add(applicableAlbumDiscount.getDiscount());
+        }
+        for (BulkPurchaseDiscount applicableBulkPurchaseDiscount : applicableBulkPurchaseDiscounts) {
+            listOfDiscounts.add(applicableBulkPurchaseDiscount.getDiscount());
+        }
+        Integer maxDiscount = max(listOfDiscounts);
+        totalCost = totalCost.multiply(BigDecimal.valueOf((maxDiscount.floatValue() / 100)));
+        return new ResponseEntity<>(totalCost.toString(), HttpStatus.OK);
+    }
+
+    public BigDecimal getAlbumCost(Album albumId) {
+        List<Track> albumTracks = trackRepository.findByAlbumId(albumId);
+        BigDecimal totalCost = new BigDecimal(0);
+        for (Track track : albumTracks) {
+            totalCost = totalCost.add(track.getUnitPrice());
+        }
+        ArrayList<AlbumDiscount> applicableAlbumDiscounts = (ArrayList<AlbumDiscount>) albumDiscountRepository.findAllById(List.of(albumId.getId())).stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<BulkPurchaseDiscount> applicableBulkPurchaseDiscounts = (ArrayList<BulkPurchaseDiscount>) bulkPurchaseDiscountRepository.findAll().stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<Integer> listOfDiscounts = new ArrayList<>();
+        for (AlbumDiscount applicableAlbumDiscount : applicableAlbumDiscounts) {
+            listOfDiscounts.add(applicableAlbumDiscount.getDiscount());
+        }
+        for (BulkPurchaseDiscount applicableBulkPurchaseDiscount : applicableBulkPurchaseDiscounts) {
+            listOfDiscounts.add(applicableBulkPurchaseDiscount.getDiscount());
+        }
+        Integer maxDiscount = max(listOfDiscounts);
+        totalCost = totalCost.multiply(BigDecimal.valueOf((maxDiscount.floatValue() / 100)));
+        return totalCost;
     }
 }
 

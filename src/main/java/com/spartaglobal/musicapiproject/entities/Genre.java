@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "genre")
-public class Genre implements UserSearchable{
+public class Genre implements UserSearchable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "GenreId", nullable = false)
