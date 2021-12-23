@@ -63,10 +63,6 @@ public class AlbumController {
         // Authorization
         String token = authTokenHeader.split(" ")[1];
         if (!as.isAuthorizedForAction(token, "/chinook/album/delete")) {
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         // Check album exists
@@ -99,11 +95,7 @@ public class AlbumController {
     @PostMapping("/chinook/album/create")
     public ResponseEntity createAlbum(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Album newAlbum) {
         String token = authTokenHeader.split(" ")[1];
-<<<<<<< HEAD
         if (!as.isAuthorizedForAction(token, "/chinook/album/create")) {
-=======
-        if (!as.isAuthorizedForAction(token, "chinook/album/create")) {
->>>>>>> dev
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         albumRepository.save(newAlbum);
@@ -113,11 +105,7 @@ public class AlbumController {
     @PutMapping(value = "/chinook/album/update")
     public ResponseEntity updateAlbum(@RequestBody Album newState, @RequestHeader("Authorization") String authTokenHeader) {
         String token = authTokenHeader.split(" ")[1];
-<<<<<<< HEAD
         if (!as.isAuthorizedForAction(token, "/chinook/album/update")) {
-=======
-        if (!as.isAuthorizedForAction(token, "chinook/album/update")) {
->>>>>>> dev
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Album> oldState = albumRepository.findById(newState.getId());

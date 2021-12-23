@@ -66,10 +66,6 @@ public class CustomerController {
         return new ResponseEntity("Customer updated", HttpStatus.OK);
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
     @GetMapping("/chinook/customer/tracks")
     public List<Track> getCustomerTracks(@RequestParam Integer customerId) {
         Customer customer = customerRepository.getById(customerId);

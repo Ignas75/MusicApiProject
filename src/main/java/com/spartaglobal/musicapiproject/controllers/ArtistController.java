@@ -21,8 +21,6 @@ public class ArtistController {
     @Autowired
     private ArtistRepository artistRepository;
     @Autowired
-<<<<<<< HEAD
-=======
     private TrackRepository trackRepository;
     @Autowired
     private InvoicelineRepository invoicelineRepository;
@@ -31,7 +29,6 @@ public class ArtistController {
     @Autowired
     private AlbumRepository albumRepository;
     @Autowired
->>>>>>> dev
     private AuthorizationService as;
 
 
@@ -44,36 +41,23 @@ public class ArtistController {
     @PostMapping("/chinook/artist/create")
     public ResponseEntity<String> createArtist(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Artist newArtist) {
         String token = authTokenHeader.split(" ")[1];
-<<<<<<< HEAD
         if (!as.isAuthorizedForAction(token, "/chinook/artist/create")) {
-=======
-        if (as.isAuthorizedForAction(token, "/chinook/artist/create")) {
-
->>>>>>> dev
-            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         artistRepository.save(newArtist);
-        return new ResponseEntity<>(newArtist, HttpStatus.OK);
+        return new ResponseEntity(newArtist, HttpStatus.OK);
     }
 
     @PutMapping(value = "/chinook/artist/update")
     public ResponseEntity<String> updateTrack(@RequestBody Artist newState, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-<<<<<<< HEAD
         if(!as.isAuthorizedForAction(token,"/chinook/artist/update")){
-=======
-        if(!as.isAuthorizedForAction(token,"/chinook/artist/create")){
->>>>>>> dev
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Artist> oldState = artistRepository.findById(newState.getId());
         if(oldState.isEmpty()) return null;
         artistRepository.save(newState);
-<<<<<<< HEAD
         return new ResponseEntity(newState, HttpStatus.OK);
-=======
-        return new ResponseEntity("Artist updated", HttpStatus.OK);
->>>>>>> dev
     }
 
     @Transactional
@@ -81,12 +65,6 @@ public class ArtistController {
     public ResponseEntity<String> deleteArtist(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
         if(!as.isAuthorizedForAction(token,"/chinook/artist/delete")){
-<<<<<<< HEAD
-            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        artistRepository.delete(artistRepository.getById(id));
-        return new ResponseEntity(artistRepository.getById(id), HttpStatus.OK);
-=======
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Artist> artist = artistRepository.findById(id);
@@ -124,12 +102,5 @@ public class ArtistController {
             return new ResponseEntity("Cannot delete an artist whose songs have been purchased", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity("Artist does not exist", HttpStatus.NOT_FOUND);
-
-      if(!as.isAuthorizedForAction(token,"chinook/artist/delete")){
-            return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
-        }
-        artistRepository.delete(artistRepository.getById(id));
-        return new ResponseEntity("Artist deleted", HttpStatus.OK);
->>>>>>> dev
     }
 }

@@ -25,6 +25,7 @@ public class ArtistControllerTest {
 
     @Test
     public void updateArtist() throws IOException, URISyntaxException, InterruptedException {
+
         //setting original value
         HttpResponse<String> resp = ArtistRequest.putArtistRequest("jj11bpuFUxK2u4PmikEW", 6, "Antônio Carlos Jobim");
         Assertions.assertEquals("Antônio Carlos Jobim", ArtistRequest.returnJsonBody(resp).getName());
