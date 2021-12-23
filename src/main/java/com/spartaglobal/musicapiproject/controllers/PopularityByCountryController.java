@@ -32,6 +32,7 @@ public class PopularityByCountryController {
     AuthorizationService authorizationService;
 
     @GetMapping("/chinook/popularitybycountry/albums")
+
     public ResponseEntity<?> getAlbumPopularityByBillingCountry(@RequestParam String country, @RequestParam int numRecords, @RequestParam String sortType, @RequestHeader("Authorization") String authToken, @RequestHeader("Accept") String contentType){
         if (ContentTypeService.getReturnContentType(contentType)!= null) {
             if (!authorizationService.isAuthorizedForAction(authToken.split(" ")[1], "/chinook/popularitybycountry/albums")) {

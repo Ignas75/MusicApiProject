@@ -1,7 +1,5 @@
 package com.spartaglobal.musicapiproject.entities;
 
-import org.apache.catalina.User;
-
 import javax.persistence.*;
 import java.math.BigDecimal;
 

@@ -1,8 +1,6 @@
 package com.spartaglobal.musicapiproject.controllers;
 
-import com.spartaglobal.musicapiproject.entities.Album;
-import com.spartaglobal.musicapiproject.entities.Customer;
-import com.spartaglobal.musicapiproject.entities.Track;
+import com.spartaglobal.musicapiproject.entities.*;
 import com.spartaglobal.musicapiproject.repositories.*;
 import com.spartaglobal.musicapiproject.services.AuthorizationService;
 import com.spartaglobal.musicapiproject.services.ContentTypeService;
@@ -13,12 +11,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Collections.max;
+
 @RestController
 public class AlbumController {
+    AlbumDiscountRepository albumDiscountRepository;
+    @Autowired
+    BulkPurchaseDiscountRepository bulkPurchaseDiscountRepository;
     @Autowired
     private AlbumRepository albumRepository;
     @Autowired
@@ -58,6 +64,7 @@ public class AlbumController {
             if (as.isAuthorizedForAction(token, "chinook/album/delete")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
             }
+
             trackRepository.delete(trackRepository.getById(id));
             return new ResponseEntity<>("Album deleted", HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
@@ -73,6 +80,7 @@ public class AlbumController {
             albumRepository.save(newAlbum);
             return new ResponseEntity<>("Album Created", HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+
     }
 
     @PutMapping(value = "/chinook/album/update")
@@ -122,6 +130,47 @@ public class AlbumController {
             }
             return new ResponseEntity<>("Customer owns all the tracks in album", HttpStatus.OK);
         } else return new ResponseEntity<>("Unsupported Media Type Specified", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @GetMapping("/chinook/album/cost")
+    public ResponseEntity<String> getAlbumCost(@RequestParam Integer albumId) {
+        List<Track> albumTracks = getAlbumTracks(albumId);
+        BigDecimal totalCost = new BigDecimal(0);
+        for (Track track : albumTracks) {
+            totalCost = totalCost.add(track.getUnitPrice());
+        }
+        ArrayList<AlbumDiscount> applicableAlbumDiscounts = (ArrayList<AlbumDiscount>) albumDiscountRepository.findAllById(List.of(albumId)).stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<BulkPurchaseDiscount> applicableBulkPurchaseDiscounts = (ArrayList<BulkPurchaseDiscount>) bulkPurchaseDiscountRepository.findAll().stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<Integer> listOfDiscounts = new ArrayList<>();
+        for (AlbumDiscount applicableAlbumDiscount : applicableAlbumDiscounts) {
+            listOfDiscounts.add(applicableAlbumDiscount.getDiscount());
+        }
+        for (BulkPurchaseDiscount applicableBulkPurchaseDiscount : applicableBulkPurchaseDiscounts) {
+            listOfDiscounts.add(applicableBulkPurchaseDiscount.getDiscount());
+        }
+        Integer maxDiscount = max(listOfDiscounts);
+        totalCost = totalCost.multiply(BigDecimal.valueOf((maxDiscount.floatValue() / 100)));
+        return new ResponseEntity<>(totalCost.toString(), HttpStatus.OK);
+    }
+
+    public BigDecimal getAlbumCost(Album albumId) {
+        List<Track> albumTracks = trackRepository.findByAlbumId(albumId);
+        BigDecimal totalCost = new BigDecimal(0);
+        for (Track track : albumTracks) {
+            totalCost = totalCost.add(track.getUnitPrice());
+        }
+        ArrayList<AlbumDiscount> applicableAlbumDiscounts = (ArrayList<AlbumDiscount>) albumDiscountRepository.findAllById(List.of(albumId.getId())).stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<BulkPurchaseDiscount> applicableBulkPurchaseDiscounts = (ArrayList<BulkPurchaseDiscount>) bulkPurchaseDiscountRepository.findAll().stream().filter(s -> s.getLastValidDay().isBefore(LocalDate.now().plusDays(1))).toList();
+        ArrayList<Integer> listOfDiscounts = new ArrayList<>();
+        for (AlbumDiscount applicableAlbumDiscount : applicableAlbumDiscounts) {
+            listOfDiscounts.add(applicableAlbumDiscount.getDiscount());
+        }
+        for (BulkPurchaseDiscount applicableBulkPurchaseDiscount : applicableBulkPurchaseDiscounts) {
+            listOfDiscounts.add(applicableBulkPurchaseDiscount.getDiscount());
+        }
+        Integer maxDiscount = max(listOfDiscounts);
+        totalCost = totalCost.multiply(BigDecimal.valueOf((maxDiscount.floatValue() / 100)));
+        return totalCost;
     }
 }
 

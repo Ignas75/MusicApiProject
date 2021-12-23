@@ -100,12 +100,13 @@ public class CustomerController {
         return customerTracks.stream().filter(s -> s.getAlbumId().equals(album)).toList();
     }
 
+
     private Archiveinvoice genArchiveInvoice(Invoice invoice){
         Archiveinvoice archiveinvoice = new Archiveinvoice();
         archiveinvoice.setFirstName(invoice.getCustomerId().getFirstName());
         archiveinvoice.setLastName(invoice.getCustomerId().getLastName());
         archiveinvoice.setEmailAddress(invoice.getCustomerId().getEmail());
-        archiveinvoice.setAddress(invoice.getBillingAddress() +" "+  invoice.getBillingCity() +" "+  invoice.getBillingState() +" "+ invoice.getBillingCountry());
+        archiveinvoice.setAddress(invoice.getBillingAddress() + " " + invoice.getBillingCity() + " " + invoice.getBillingState() + " " + invoice.getBillingCountry());
         archiveinvoice.setPostalCode(invoice.getBillingPostalCode());
         archiveinvoice.setInvoiceDate(invoice.getInvoiceDate());
         archiveinvoice.setTotal(invoice.getTotal());

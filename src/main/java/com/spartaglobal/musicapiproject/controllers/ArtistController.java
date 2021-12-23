@@ -75,6 +75,7 @@ public class ArtistController {
             String token = authTokenHeader.split(" ")[1];
             if (as.isAuthorizedForAction(token, "chinook/artist/create")) {
                 return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
+
             }
             Optional<Artist> artist = artistRepository.findById(id);
             if (artist.isPresent()) {
