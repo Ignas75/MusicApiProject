@@ -38,7 +38,9 @@ public class TrackController {
     @GetMapping("/chinook/track/buy")
     public ResponseEntity buyTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        // Valid token check
+        if(!as.isAuthorizedForAction(token,"chinook/track/buy")){
+            return new ResponseEntity<>("Not Customer", HttpStatus.UNAUTHORIZED);
+        }
         String customerEmail;
         try {
             customerEmail = tokenRepository.getByAuthToken(token).getEmail();
@@ -67,7 +69,7 @@ public class TrackController {
     @PostMapping("/chinook/track/create")
     public ResponseEntity createTrack(@RequestHeader("Authorization") String authTokenHeader, @RequestBody Track newTrack){
         String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/track/create")){
+        if(!as.isAuthorizedForAction(token,"chinook/track/create")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         trackRepository.save(newTrack);
@@ -86,7 +88,7 @@ public class TrackController {
     @PutMapping(value = "/chinook/track/update")
     public ResponseEntity updateTrack(@RequestBody Track newState, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
-        if(!as.isAuthorizedForAction(token,"/chinook/track/update")){
+        if(!as.isAuthorizedForAction(token,"chinook/track/update")){
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         Optional<Track> oldState = trackRepository.findById(newState.getId());
@@ -101,6 +103,7 @@ public class TrackController {
     public ResponseEntity deleteTrack(@RequestParam Integer id, @RequestHeader("Authorization") String authTokenHeader){
         String token = authTokenHeader.split(" ")[1];
         if(!as.isAuthorizedForAction(token,"/chinook/track/delete")){
+
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         List<Invoiceline> invoiceLines = invoicelineRepository.findAllByTrackId(trackRepository.getById(id));

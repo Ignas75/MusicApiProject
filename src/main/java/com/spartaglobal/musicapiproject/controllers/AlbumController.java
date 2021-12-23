@@ -63,6 +63,7 @@ public class AlbumController {
         // Authorization
         String token = authTokenHeader.split(" ")[1];
         if (!as.isAuthorizedForAction(token, "/chinook/album/delete")) {
+
             return new ResponseEntity<>("Not Authorized", HttpStatus.UNAUTHORIZED);
         }
         // Check album exists
